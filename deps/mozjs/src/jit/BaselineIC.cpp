@@ -992,6 +992,12 @@ DoUseCountFallback(JSContext *cx, ICUseCount_Fallback *stub, BaselineFrame *fram
     IonOsrTempData *info = PrepareOsrTempData(cx, stub, frame, script, pc, jitcode);
     if (!info)
         return false;
+
+    if(js_JitOptions.enableMonitor)
+        printf("IonCompile;%s;%d;%d;%d\n", script->filename(), script->lineno(), 
+                                           script->column(), 
+                                           (int) script->getUseCount());
+
     *infoPtr = info;
 
     return true;
@@ -1305,13 +1311,27 @@ DoTypeMonitorFallback(JSContext *cx, BaselineFrame *frame, ICTypeMonitor_Fallbac
     if (stub->monitorsThis()) {
         JS_ASSERT(pc == script->code());
         types::TypeScript::SetThis(cx, script, value);
+        if (js_JitOptions.enableMonitor) {
+            JSOp op = JSOp(*pc);
+            JSValueType type = value.isDouble() ? JSVAL_TYPE_DOUBLE : value.extractNonDoubleType();
+            printf("MonitorThis;%s+%d+%d+%d+%s;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), js_CodeName[op], type);
+        }
     } else if (stub->monitorsArgument(&argument)) {
         JS_ASSERT(pc == script->code());
         types::TypeScript::SetArgument(cx, script, argument, value);
+        if (js_JitOptions.enableMonitor) {
+            JSOp op = JSOp(*pc);
+            JSValueType type = value.isDouble() ? JSVAL_TYPE_DOUBLE : value.extractNonDoubleType();
+            printf("MonitorArgument;%s+%d+%d+%d+%s;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), js_CodeName[op], type);
+        }
     } else {
         types::TypeScript::Monitor(cx, script, pc, value);
+        if (js_JitOptions.enableMonitor) {
+            JSOp op = JSOp(*pc);
+            JSValueType type = value.isDouble() ? JSVAL_TYPE_DOUBLE : value.extractNonDoubleType();
+            printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), js_CodeName[op], type);
+        }
     }
-
     if (!stub->addMonitorStubForValue(cx, script, value))
         return false;
 
@@ -4036,14 +4056,25 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
         // Handle optimized arguments[i] access.
         if (!GetElemOptimizedArguments(cx, frame, &lhsCopy, rhs, res, &isOptimizedArgs))
             return false;
-        if (isOptimizedArgs)
+        if (isOptimizedArgs) {
             types::TypeScript::Monitor(cx, frame->script(), pc, res);
+            if (js_JitOptions.enableMonitor) {
+                JSOp op = JSOp(*pc);
+                JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+                printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
+            }
+        }
     }
 
     if (!isOptimizedArgs) {
         if (!GetElementOperation(cx, op, &lhsCopy, rhs, res))
             return false;
         types::TypeScript::Monitor(cx, frame->script(), pc, res);
+        if (js_JitOptions.enableMonitor) {
+            JSOp op = JSOp(*pc);
+            JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+            printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
+            }
     }
 
     // Check if debug mode toggling made the stub invalid.
@@ -5853,6 +5884,11 @@ DoGetNameFallback(JSContext *cx, BaselineFrame *frame, ICGetName_Fallback *stub_
     }
 
     types::TypeScript::Monitor(cx, script, pc, res);
+    if (js_JitOptions.enableMonitor) {
+        JSOp op = JSOp(*pc);
+        JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+        printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
+    }
 
     // Check if debug mode toggling made the stub invalid.
     if (stub.invalid())
@@ -6034,6 +6070,11 @@ DoGetIntrinsicFallback(JSContext *cx, BaselineFrame *frame, ICGetIntrinsic_Fallb
     // directly.
 
     types::TypeScript::Monitor(cx, script, pc, res);
+    if (js_JitOptions.enableMonitor) {
+        JSOp op = JSOp(*pc);
+        JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+        printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", script->filename(), script->lineno(), script->column(), stub->icEntry()->pcOffset(), js_CodeName[op], type);
+    }
 
     // Check if debug mode toggling made the stub invalid.
     if (stub.invalid())
@@ -6522,6 +6563,9 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     jsbytecode *pc = stub->icEntry()->pc(frame->script());
     JSOp op = JSOp(*pc);
     FallbackICSpew(cx, stub, "GetProp(%s)", js_CodeName[op]);
+    if (js_JitOptions.enableMonitor) {
+        printf("GetpropFallback;%s;%d;%d;%d\n", frame->script()->filename(), frame->script()->lineno(), frame->script()->column(), frame->script()->pcToOffset(pc));
+    }
 
     JS_ASSERT(op == JSOP_GETPROP || op == JSOP_CALLPROP || op == JSOP_LENGTH || op == JSOP_GETXPROP);
 
@@ -6530,6 +6574,11 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         return false;
 
     types::TypeScript::Monitor(cx, frame->script(), pc, res);
+    if (js_JitOptions.enableMonitor && res.isPrimitive()) {
+        JSOp op = JSOp(*pc);
+        JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+        printf("MonitorBytecode:%s+%d+%d+%d+%s:%d\n", frame->script()->filename(), frame->script()->lineno(), frame->script()->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
+    }
 
     // Check if debug mode toggling made the stub invalid.
     if (stub.invalid())
@@ -8421,6 +8470,11 @@ DoCallFallback(JSContext *cx, BaselineFrame *frame, ICCall_Fallback *stub_, uint
     }
 
     types::TypeScript::Monitor(cx, script, pc, res);
+    if (js_JitOptions.enableMonitor) {
+        JSOp op = JSOp(*pc);
+        JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
+        printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), js_CodeName[op], type);
+    }
 
     // Check if debug mode toggling made the stub invalid.
     if (stub.invalid())

@@ -1513,7 +1513,7 @@ HandleBoundsCheckFailure(JSContext *cx, HandleScript outerScript, HandleScript i
 }
 
 static bool
-HandleShapeGuardFailure(JSContext *cx, HandleScript outerScript, HandleScript innerScript)
+HandleShapeGuardFailure(JSContext *cx, HandleScript outerScript, HandleScript innerScript, jsbytecode *pc)
 {
     IonSpew(IonSpew_Bailouts, "Shape guard failure %s:%d, inlined into %s:%d",
             innerScript->filename(), innerScript->lineno(),
@@ -1525,6 +1525,12 @@ HandleShapeGuardFailure(JSContext *cx, HandleScript outerScript, HandleScript in
     // the flag on innerScript as opposed to outerScript, and maybe invalidating both
     // inner and outer scripts, instead of just the outer one.
     outerScript->setFailedShapeGuard();
+    
+    if (js_JitOptions.enableMonitor) {
+        JSOp op = JSOp(*pc);
+        printf("ShapeGuardFailure;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(innerScript, pc), innerScript->filename(), innerScript->lineno(), innerScript->column(), innerScript->pcToOffset(pc), js_CodeName[op]);
+    }
+
     IonSpew(IonSpew_BaselineBailouts, "Invalidating due to shape guard failure");
     return Invalidate(cx, outerScript);
 }
@@ -1595,6 +1601,8 @@ jit::FinishBailoutToBaseline(BaselineBailoutInfo *bailoutInfo)
     uint32_t numFrames = bailoutInfo->numFrames;
     JS_ASSERT(numFrames > 0);
     BailoutKind bailoutKind = bailoutInfo->bailoutKind;
+    jsbytecode *pc;
+    cx->currentScript(&pc);
 
     // Free the bailout buffer.
     js_free(bailoutInfo);
@@ -1737,7 +1745,7 @@ jit::FinishBailoutToBaseline(BaselineBailoutInfo *bailoutInfo)
             return false;
         break;
       case Bailout_ShapeGuard:
-        if (!HandleShapeGuardFailure(cx, outerScript, innerScript))
+        if (!HandleShapeGuardFailure(cx, outerScript, innerScript, pc))
             return false;
         break;
       case Bailout_IonExceptionDebugMode:

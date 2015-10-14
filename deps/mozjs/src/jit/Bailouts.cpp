@@ -296,6 +296,10 @@ jit::CheckFrequentBailouts(JSContext *cx, JSScript *script)
         {
             script->setHadFrequentBailouts();
 
+            if (js::jit::js_JitOptions.enableMonitor)
+                printf("FrequentBailout;%s;%d;%d\n", script->filename(), 
+                                                     (int) script->lineno(), 
+                                                     (int) script->column());
             IonSpew(IonSpew_Invalidate, "Invalidating due to too many bailouts");
 
             if (!Invalidate(cx, script))
