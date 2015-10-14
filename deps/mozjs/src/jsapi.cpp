@@ -44,6 +44,7 @@
 #include "jsweakmap.h"
 #include "jswrapper.h"
 #include "prmjtime.h"
+#include "jsoracle.h"
 
 #include "asmjs/AsmJSLink.h"
 #include "builtin/Eval.h"
@@ -642,6 +643,11 @@ JS::isGCEnabled()
 JS_FRIEND_API(bool) JS::isGCEnabled() { return true; }
 #endif
 
+static bool file_exists (const char* name) {
+  struct stat buffer;
+  return (stat (name, &buffer) == 0);
+}
+
 JS_PUBLIC_API(JSRuntime *)
 JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRuntime)
 {
@@ -661,6 +667,17 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
     if (!rt->init(maxbytes, maxNurseryBytes)) {
         JS_DestroyRuntime(rt);
         return nullptr;
+    }
+    if (file_exists("/tmp/enableMonitor")) {
+        printf("Created a new runtime\n");
+    	jit::js_JitOptions.enableMonitor = true;
+    }
+    if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {
+    	jit::js_JitOptions.enableOracle = true;
+	const char* oracleFile = "/tmp/oracleFile.or";
+	Oracle *oracle = new Oracle();
+	oracle->init(oracleFile);
+	rt->SetOracle(oracle);
     }
 
     return rt;

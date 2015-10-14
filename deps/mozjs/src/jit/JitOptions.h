@@ -49,6 +49,8 @@ struct JitOptions
     IonRegisterAllocator forcedRegisterAllocator;
     bool limitScriptSize;
     bool osr;
+    bool enableMonitor;
+    bool enableOracle;
     uint32_t baselineUsesBeforeCompile;
     uint32_t exceptionBailoutThreshold;
     uint32_t frequentBailoutThreshold;

@@ -42,6 +42,7 @@
 #include "vm/Stack.h"
 #include "vm/Symbol.h"
 #include "vm/ThreadPool.h"
+#include "jsoracle.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -1064,7 +1065,10 @@ struct JSRuntime : public JS::shadow::Runtime,
 #ifdef XP_MACOSX
     js::AsmJSMachExceptionHandler asmJSMachExceptionHandler;
 #endif
-
+    void SetOracle(js::Oracle* oracle) {
+        this->oracle = oracle;
+    }
+    js::Oracle *oracle;
   private:
     // Whether asm.js signal handlers have been installed and can be used for
     // performing interrupt checks in loops.

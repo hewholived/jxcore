@@ -83,6 +83,10 @@ JitOptions::JitOptions()
     // Toggles whether functions may be entered at loop headers.
     osr = true;
 
+    enableMonitor = false;
+
+    enableOracle = false;
+
     // How many invocations or loop iterations are needed before functions
     // are compiled with the baseline compiler.
     baselineUsesBeforeCompile = 10;
