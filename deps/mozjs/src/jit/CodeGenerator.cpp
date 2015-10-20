@@ -6924,6 +6924,10 @@ CodeGenerator::link(JSContext *cx, types::CompilerConstraintList *constraints)
     IonSpew(IonSpew_Codegen, "Created IonScript %p (raw %p)",
             (void *) ionScript, (void *) code->raw());
 
+    if (js_JitOptions.enableMonitor)
+      printf("IonCompile;%s;%d;%d;%d\n",
+              script->filename(), script->lineno(), script->column(),
+              (int)script->getUseCount());
     ionScript->setInvalidationEpilogueDataOffset(invalidateEpilogueData_.offset());
     ionScript->setOsrPc(gen->info().osrPc());
     ionScript->setOsrEntryOffset(getOsrEntryOffset());

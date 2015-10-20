@@ -669,7 +669,7 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
         return nullptr;
     }
     if (file_exists("/tmp/enableMonitor")) {
-        printf("Created a new runtime\n");
+        //printf("Created a new runtime\n");
     	jit::js_JitOptions.enableMonitor = true;
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {

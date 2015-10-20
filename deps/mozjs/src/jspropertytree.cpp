@@ -9,6 +9,8 @@
 #include "jscntxt.h"
 #include "jsgc.h"
 #include "jstypes.h"
+#include "jsscriptinlines.h"
+#include "jsfun.h"
 
 #include "vm/Shape.h"
 
@@ -35,6 +37,21 @@ Shape *
 PropertyTree::newShape(ExclusiveContext *cx)
 {
     Shape *shape = js_NewGCShape(cx);
+    JSContext *jcx = cx->asJSContext();
+    jsbytecode *pc;
+
+    JSScript *script = jcx->currentScript(&pc,JSContext::ALLOW_CROSS_COMPARTMENT);
+    if (script->savedCallerFun()) {
+    	JSFunction *cFunc = nullptr;
+    	JSScript *cScript = nullptr;
+
+    	if (script->savedCallerFun()) {
+    		cFunc = script->getCallerFunction();
+    	 	cScript = cFunc->nonLazyScript();
+    	}
+    }
+
+
     if (!shape)
         js_ReportOutOfMemory(cx);
     return shape;

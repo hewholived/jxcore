@@ -993,10 +993,10 @@ DoUseCountFallback(JSContext *cx, ICUseCount_Fallback *stub, BaselineFrame *fram
     if (!info)
         return false;
 
-    if(js_JitOptions.enableMonitor)
-        printf("IonCompile;%s;%d;%d;%d\n", script->filename(), script->lineno(), 
-                                           script->column(), 
-                                           (int) script->getUseCount());
+//    if(js_JitOptions.enableMonitor)
+//        printf("IonCompile;%s;%d;%d;%d\n", script->filename(), script->lineno(),
+//                                           script->column(),
+//                                           (int) script->getUseCount());
 
     *infoPtr = info;
 
@@ -4073,8 +4073,8 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
         if (js_JitOptions.enableMonitor) {
             JSOp op = JSOp(*pc);
             JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
-            printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
-            }
+            //printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
+         }
     }
 
     // Check if debug mode toggling made the stub invalid.
@@ -6564,7 +6564,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     JSOp op = JSOp(*pc);
     FallbackICSpew(cx, stub, "GetProp(%s)", js_CodeName[op]);
     if (js_JitOptions.enableMonitor) {
-        printf("GetpropFallback;%s;%d;%d;%d\n", frame->script()->filename(), frame->script()->lineno(), frame->script()->column(), frame->script()->pcToOffset(pc));
+        //printf("GetpropFallback;%s;%d;%d;%d\n", frame->script()->filename(), frame->script()->lineno(), frame->script()->column(), frame->script()->pcToOffset(pc));
     }
 
     JS_ASSERT(op == JSOP_GETPROP || op == JSOP_CALLPROP || op == JSOP_LENGTH || op == JSOP_GETXPROP);

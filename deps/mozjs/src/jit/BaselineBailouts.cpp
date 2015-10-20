@@ -881,7 +881,6 @@ InitFromBailout(JSContext *cx, HandleScript caller, jsbytecode *callerPC,
       printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(), 
                                               (int) script->lineno(), (int) script->column(), 
                                               pcOff, BailoutKindString(bailoutKind));
-     //cx->runtime()->oracle->monitor( 
     }
 
     // If this was the last inline frame, or we are bailing out to a catch or
