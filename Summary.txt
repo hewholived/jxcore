@@ -29,3 +29,7 @@ Almost 0 deoptimizations
 Earlier optimization based on type stability rather than some random value
 Leverage the online profiler instead of bypassing it.
 
+Change the numbers to not be cumulative.
+Perfect information vs our approach
+
+
