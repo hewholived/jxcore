@@ -1,0 +1,31 @@
+Launching new instances with already collected profile information
+
+Profile information divided into 2 parts
+1 - cachable information CI
+  Primitive types for bytecodes and arguments
+  Inference decisions
+2 - non-cachable information NCI
+  Object shapes
+  Getters and setters
+  Common slot offsets
+
+So solve the NCI problem, 2 approaches
+1 - Shape tracking (overaproximate)
+  Memory overhead for some benchmarks
+  Shapes created afted func is optimized
+  No benifit
+2 - Track type stability wrt shapes and launch Ion as soon as it is stable
+  Easier approach
+  Only need to keep track of the use count for the baseline code
+
+Deoptimizations
+1 - Primitive types and Overflow (trivial)
+2 - Shape guard - generate code to do PIC at the Ion level
+3 - Other freq deopts - do not optimize
+
+Result
+======
+Almost 0 deoptimizations
+Earlier optimization based on type stability rather than some random value
+Leverage the online profiler instead of bypassing it.
+

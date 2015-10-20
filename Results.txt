@@ -1,0 +1,89 @@
+Monnet/dgram.js len=1 num=100 type=send dur=5: 0.00061045
+Monnet/dgram.js len=1 num=100 type=recv dur=5: 0.00019969
+Monnet/dgram.js len=64 num=100 type=send dur=5: 0.038758
+Monnet/dgram.js len=64 num=100 type=recv dur=5: 0.012755
+Monnet/dgram.js len=256 num=100 type=send dur=5: 0.15419
+Monnet/dgram.js len=256 num=100 type=recv dur=5: 0.049756
+MonitorBytecode;buffernet/dgram.js len=1024 num=100 type=send dur=5: 0.59000
+MonitorBytecode;buffernet/dgram.js len=1024 num=100 type=recv dur=5: 0.19508
+MonitorBytecode;events.js+155+12+6net/net-c2s.js len=102400 type=utf dur=5: 1.1756
+Monitonet/net-c2s.js len=102400 type=asc dur=5: 4.9596
+MonitorBytecodenet/net-c2s.js len=102400 type=buf dur=5: 4.4465
+net/net-c2s.js len=16777216 type=utf dur=5: 0.97696
+MonitorBytecode:node.js+874+net/net-c2s.js len=16777216 type=asc dur=5: 3.6781
+MonitorBytecode;buffer.js+128+15net/net-c2s.js len=16777216 type=buf dur=5: 5.5993
+MonitorBytecode:events.js+172+27+197+gnet/net-pipe.js len=102400 type=utf dur=5: 1.8174
+MonitorBytecode;buffer.js+128+15+462+getaliasedvar;net/net-pipe.js len=102400 type=asc dur=5: 3.8765
+MonitorBytecodenet/net-pipe.js len=102400 type=buf dur=5: 4.6603
+MonitorBytecode:node.js+782+26+296+getprnet/net-pipe.js len=16777216 type=utf dur=5: 1.5926
+MonitorBytecode:node.js+874+22+5+getprop:3net/net-pipe.js len=16777216 type=asc dur=5: 4.0403
+MonitorByteconet/net-pipe.js len=16777216 type=buf dur=5: 4.9336
+MonitorBytecode;events.js+155net/net-s2c.js len=102400 type=utf dur=5: 1.1990
+Mnet/net-s2c.js len=102400 type=asc dur=5: 5.1114
+MonitorBytecode:nnet/net-s2c.js len=102400 type=buf dur=5: 4.6115
+Moninet/net-s2c.js len=16777216 type=utf dur=5: 1.0068
+MonitorBytecode:node.js+874+2net/net-s2c.js len=16777216 type=asc dur=5: 3.7030
+MonitorBytenet/net-s2c.js len=16777216 type=buf dur=5: 5.6308
+Moninet/tcp-raw-c2s.js len=102400 type=utf dur=5: 1.3401
+MonitorBytecode:buffer.js+317+33+435+genet/tcp-raw-c2s.js len=102400 type=asc dur=5: 7.1690
+MonitorBytecode;/home/mkedlaya/Research/myrepo/jxcore/benchmark/net/tcp-raw-c2s.js+109net/tcp-raw-c2s.js len=102400 type=buf dur=5: 10.019
+MonitorThis;/home/mkedlaya/Research/myrepo/jxcore/benchmark/nnet/tcp-raw-c2s.js len=16777216 type=utf dur=5: 1.0813
+MonitorArgument;/home/mkedlaynet/tcp-raw-c2s.js len=16777216 type=asc dur=5: 5.1658
+MonitorThis;/home/mkedlaya/Research/myrepo/jxcore/benchmark/net/tcp-raw-c2s.js+60+3net/tcp-raw-c2s.js len=16777216 type=buf dur=5: 10.363
+MonitorBytecode;buffer.js+128+15+506+getalnet/tcp-raw-pipe.js len=102400 type=utf dur=5: 2.3665
+MonitorArgument;utilnet/tcp-raw-pipe.js len=102400 type=asc dur=5: 8.0016
+Monnet/tcp-raw-pipe.js len=102400 type=buf dur=5: 9.7113
+MonitorArgument;/home/mkedlaya/Research/myrepo/jxcore/net/tcp-raw-pipe.js len=16777216 type=utf dur=5: 1.9173
+MonitorBytecode:buffer.js+128+15+523+getpropnet/tcp-raw-pipe.js len=16777216 type=asc dur=5: 6.6359
+MonitorArgument;/home/mkedlaya/Research/myrepo/jxcore/benchmark/net/tcp-raw-pipe.js+51+0net/tcp-raw-pipe.js len=16777216 type=buf dur=5: 9.0615
+MonitorBytecodnet/tcp-raw-s2c.js len=102400 type=utf dur=5: 1.3401
+MonitorBytecode;buffer.js+128+15+883+getaliasedvanet/tcp-raw-s2c.js len=102400 type=asc dur=5: 6.9815
+MonitorBytecode;net/tcp-raw-s2c.js len=102400 type=buf dur=5: 9.9009
+Mnet/tcp-raw-s2c.js len=16777216 type=utf dur=5: 1.0988
+MonitorBytecode;util.js+22+52+79+getnet/tcp-raw-s2c.js len=16777216 type=asc dur=5: 5.0882
+MonitorThis;/home/mkedlaya/Research/myrepo/jxcore/benchmark/net/tcp-ranet/tcp-raw-s2c.js len=16777216 type=buf dur=5: 10.360
+MonitorBytecode:eventhttp/client-request-body.js dur=5 type=asc bytes=32 method=write: 49.996
+MonitorBytecode:events.js+http/client-request-body.js dur=5 type=asc bytes=32 method=end  : 49.931
+MonitorBytecode:eventhttp/client-request-body.js dur=5 type=asc bytes=256 method=write: 49.594
+MonitorBytecode:events.js+http/client-request-body.js dur=5 type=asc bytes=256 method=end  : 49.992
+MonitorBytecode:eventhttp/client-request-body.js dur=5 type=asc bytes=1024 method=write: 49.599
+MonitorBytecode:events.js+http/client-request-body.js dur=5 type=asc bytes=1024 method=end  : 49.971
+MonitorBytechttp/client-request-body.js dur=5 type=utf bytes=32 method=write: 49.793
+MonitorBytecode:events.http/client-request-body.js dur=5 type=utf bytes=32 method=end  : 49.940
+MonitorBytechttp/client-request-body.js dur=5 type=utf bytes=256 method=write: 49.958
+MonitorBytecode:events.http/client-request-body.js dur=5 type=utf bytes=256 method=end  : 49.924
+MonitorBytechttp/client-request-body.js dur=5 type=utf bytes=1024 method=write: 49.590
+MonitorBytecode:events.http/client-request-body.js dur=5 type=utf bytes=1024 method=end  : 50.005
+IonCompile;streahttp/client-request-body.js dur=5 type=buf bytes=32 method=write: 49.699
+MonitorBytecohttp/client-request-body.js dur=5 type=buf bytes=32 method=end  : 49.587
+MonitorBytecode:eventhttp/client-request-body.js dur=5 type=buf bytes=256 method=write: 49.708
+MonitorBytecode:events.js+http/client-request-body.js dur=5 type=buf bytes=256 method=end  : 49.593
+MonitorBytecodhttp/client-request-body.js dur=5 type=buf bytes=1024 method=write: 49.590
+MonitorBytecode:evehttp/client-request-body.js dur=5 type=buf bytes=1024 method=end  : 49.589
+MonitorBytecode;self-hosted+3328+0+15+cafs/readfile.js dur=5 len=1024 concurrent=1: 5299.5
+MonitorBytecode;self-hosted+fs/readfile.js dur=5 len=1024 concurrent=10: 10234
+MonitorBytecode;buffer.js+128+15+4fs/readfile.js dur=5 len=16777216 concurrent=1: 114.77
+Mofs/readfile.js dur=5 len=16777216 concurrent=10: 251.88
+MonitorBytecode;_stream_writable.js+226+0+247+getaliasedvar;fs/write-stream-throughput.js dur=5 type=buf size=2: 0.051298
+MonitorBytecode;events.jsfs/write-stream-throughput.js dur=5 type=buf size=1024: 28.247
+MonitorBfs/write-stream-throughput.js dur=5 type=buf size=65535: 210.37
+MonitorBfs/write-stream-throughput.js dur=5 type=buf size=1048576: 224.84
+IonCompile;buffer.js;245;3fs/write-stream-throughput.js dur=5 type=asc size=2: 0.044161
+Ifs/write-stream-throughput.js dur=5 type=asc size=1024: 22.383
+MonitorArgument;util.jfs/write-stream-throughput.js dur=5 type=asc size=65535: 176.43
+MonitorBytecode;_strefs/write-stream-throughput.js dur=5 type=asc size=1048576: 218.99
+IonCompile;_stream_writable.js;15;17;1000fs/write-stream-throughput.js dur=5 type=utf size=2: 0.043539
+IonCompile;buffer.fs/write-stream-throughput.js dur=5 type=utf size=1024: 18.721
+MonitorBytecode;util.js+22+52+1fs/write-stream-throughput.js dur=5 type=utf size=65535: 85.892
+MonitorBytecode;buffer.js+128+15+294+fs/write-stream-throughput.js dur=5 type=utf size=1048576: 89.904
+MonitorBytecodetls/throughput.js dur=5 type=buf size=2: 0.31902
+Mtls/throughput.js dur=5 type=buf size=1024: 277.05
+MonitorBytecode;util.js+22+52tls/throughput.js dur=5 type=buf size=1048576: 696.40
+Motls/throughput.js dur=5 type=asc size=2: 0.22987
+MonitorBytecode;node.js+10tls/throughput.js dur=5 type=asc size=1024: 197.60
+IonCompitls/throughput.js dur=5 type=asc size=1048576: 497.74
+Mtls/throughput.js dur=5 type=utf size=2: 0.22913
+MonitorBytecode;tls/throughput.js dur=5 type=utf size=1024: 170.38
+tls/throughput.js dur=5 type=utf size=1048576: 372.74
+BailedOut;203;eventtls/tls-connect.js concurrency=1 dur=5: 432.44
+Monittls/tls-connect.js concurrency=10 dur=5: 463.83
