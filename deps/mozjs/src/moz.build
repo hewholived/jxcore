@@ -215,6 +215,7 @@ UNIFIED_SOURCES += [
     'jsgc.cpp',
     'jsinfer.cpp',
     'jsiter.cpp',
+    'jsmonitor.cpp',
     'jsnativestack.cpp',
     'jsnum.cpp',
     'jsobj.cpp',

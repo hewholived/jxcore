@@ -238,7 +238,8 @@ JSRuntime::JSRuntime(JSRuntime *parentRuntime)
 #endif
     largeAllocationFailureCallback(nullptr),
     oomCallback(nullptr),
-    oracle(nullptr)
+    oracle(nullptr),
+	jsmonitor(nullptr)
 {
     liveRuntimesCount++;
 

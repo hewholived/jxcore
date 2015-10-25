@@ -62,6 +62,10 @@ class BaselineInspector
         return script->baselineScript();
     }
 
+    JSScript *getScript() {
+    	return script;
+    }
+
   private:
 #ifdef DEBUG
     bool isValidPC(jsbytecode *pc) {

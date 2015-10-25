@@ -22,6 +22,7 @@
 #include "gc/Barrier.h"
 #include "gc/Rooting.h"
 #include "jit/IonCode.h"
+#include "jit/JitOptions.h"
 #include "vm/Shape.h"
 
 namespace JS {
@@ -1400,7 +1401,11 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     uint32_t incUseCount(uint32_t amount = 1) { return useCount += amount; }
     uint32_t *addressOfUseCount() { return &useCount; }
     static size_t offsetOfUseCount() { return offsetof(JSScript, useCount); }
-    void resetUseCount() { useCount = 0; }
+    void resetUseCount() {
+    	if (js::jit::js_JitOptions.enableMonitor)
+    		printf("Count reset for:%s;%d;%d\n", filename(), lineno_, column_);
+    	useCount = 0;
+    }
 
   public:
     bool initScriptCounts(JSContext *cx);

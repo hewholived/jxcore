@@ -179,28 +179,44 @@ BaselineInspector::expectedResultType(jsbytecode *pc)
     // Look at the IC entries for this op to guess what type it will produce,
     // returning MIRType_None otherwise.
 
+	MIRType retType = MIRType_None;
     ICStub *stub = monomorphicStub(pc);
-    if (!stub)
-        return MIRType_None;
+    if (!stub) {
+        return retType;
+    }
 
     switch (stub->kind()) {
       case ICStub::BinaryArith_Int32:
         if (stub->toBinaryArith_Int32()->allowDouble())
-            return MIRType_Double;
-        return MIRType_Int32;
+        	retType = MIRType_Double;
+            //return MIRType_Double;
+        retType = MIRType_Int32;
+        //return MIRType_Int32;
+        break;
       case ICStub::BinaryArith_BooleanWithInt32:
       case ICStub::UnaryArith_Int32:
       case ICStub::BinaryArith_DoubleWithInt32:
-        return MIRType_Int32;
+    	  retType = MIRType_Int32;
+        //return MIRType_Int32;
+    	  break;
       case ICStub::BinaryArith_Double:
       case ICStub::UnaryArith_Double:
-        return MIRType_Double;
+    	  retType = MIRType_Double;
+    	  break;
+        //return MIRType_Double;
       case ICStub::BinaryArith_StringConcat:
       case ICStub::BinaryArith_StringObjectConcat:
-        return MIRType_String;
+    	  retType = MIRType_String;
+    	  break;
+        //return MIRType_String;
       default:
-        return MIRType_None;
+    	  retType = MIRType_None;
+        //return MIRType_None;
     }
+
+    if (jit::js_JitOptions.enableMonitor)
+    	printf("Inspector;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retType);
+    return retType;
 }
 
 // Whether a baseline stub kind is suitable for a double comparison that
@@ -223,13 +239,19 @@ MCompare::CompareType
 BaselineInspector::expectedCompareType(jsbytecode *pc)
 {
     ICStub *first = monomorphicStub(pc), *second = nullptr;
-    if (!first && !dimorphicStub(pc, &first, &second))
+    if (!first && !dimorphicStub(pc, &first, &second)) {
+    	if (jit::js_JitOptions.enableMonitor)
+    	    printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MCompare::Compare_Unknown);
         return MCompare::Compare_Unknown;
+    }
 
     if (ICStub *fallback = second ? second->next() : first->next()) {
         JS_ASSERT(fallback->isFallback());
-        if (fallback->toCompare_Fallback()->hadUnoptimizableAccess())
+        if (fallback->toCompare_Fallback()->hadUnoptimizableAccess()) {
+        	if (jit::js_JitOptions.enableMonitor)
+        		printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MCompare::Compare_Unknown);
             return MCompare::Compare_Unknown;
+        }
     }
 
     if (CanUseInt32Compare(first->kind()) && (!second || CanUseInt32Compare(second->kind()))) {
@@ -240,10 +262,15 @@ BaselineInspector::expectedCompareType(jsbytecode *pc)
                ? second->toCompare_Int32WithBoolean()
                : nullptr);
         if (coerce) {
-            return coerce->lhsIsInt32()
+        	MCompare::CompareType retType = coerce->lhsIsInt32()
                    ? MCompare::Compare_Int32MaybeCoerceRHS
                    : MCompare::Compare_Int32MaybeCoerceLHS;
+        	if (jit::js_JitOptions.enableMonitor)
+        		printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retType);
+        	return retType;
         }
+        if (jit::js_JitOptions.enableMonitor)
+        	printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MCompare::Compare_Int32);
         return MCompare::Compare_Int32;
     }
 
@@ -255,13 +282,20 @@ BaselineInspector::expectedCompareType(jsbytecode *pc)
               ? second->toCompare_NumberWithUndefined()
               : nullptr;
         if (coerce) {
-            return coerce->lhsIsUndefined()
+        	MCompare::CompareType retType = coerce->lhsIsUndefined()
                    ? MCompare::Compare_DoubleMaybeCoerceLHS
                    : MCompare::Compare_DoubleMaybeCoerceRHS;
+        	if (jit::js_JitOptions.enableMonitor)
+        		printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retType);
+        	return retType;
         }
+        if (jit::js_JitOptions.enableMonitor)
+        	printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MCompare::Compare_Double);
         return MCompare::Compare_Double;
     }
 
+    if (jit::js_JitOptions.enableMonitor)
+    	printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MCompare::Compare_Unknown);
     return MCompare::Compare_Unknown;
 }
 
@@ -310,8 +344,11 @@ TryToSpecializeBinaryArithOp(ICStub **stubs,
 MIRType
 BaselineInspector::expectedBinaryArithSpecialization(jsbytecode *pc)
 {
-    if (!hasBaselineScript())
+    if (!hasBaselineScript()) {
+    	if (jit::js_JitOptions.enableMonitor)
+    		printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MIRType_None);
         return MIRType_None;
+    }
 
     MIRType result;
     ICStub *stubs[2];
@@ -321,20 +358,30 @@ BaselineInspector::expectedBinaryArithSpecialization(jsbytecode *pc)
     if (stub->isBinaryArith_Fallback() &&
         stub->toBinaryArith_Fallback()->hadUnoptimizableOperands())
     {
+    	if (jit::js_JitOptions.enableMonitor)
+    		printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MIRType_None);
         return MIRType_None;
     }
 
     stubs[0] = monomorphicStub(pc);
     if (stubs[0]) {
-        if (TryToSpecializeBinaryArithOp(stubs, 1, &result))
+        if (TryToSpecializeBinaryArithOp(stubs, 1, &result)) {
+        	if (jit::js_JitOptions.enableMonitor)
+        		printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), result);
             return result;
+        }
     }
 
     if (dimorphicStub(pc, &stubs[0], &stubs[1])) {
-        if (TryToSpecializeBinaryArithOp(stubs, 2, &result))
+        if (TryToSpecializeBinaryArithOp(stubs, 2, &result)) {
+        	if (jit::js_JitOptions.enableMonitor)
+        		printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), result);
             return result;
+        }
     }
 
+    if (jit::js_JitOptions.enableMonitor)
+    	printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), MIRType_None);
     return MIRType_None;
 }
 

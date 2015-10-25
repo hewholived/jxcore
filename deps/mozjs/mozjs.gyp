@@ -162,6 +162,7 @@
        'src/jsgc.cpp',
        'src/jsinfer.cpp',
        'src/jsiter.cpp',
+       'src/jsmonitor.cpp',
        'src/jsnativestack.cpp',
        'src/jsnum.cpp',
        'src/jsobj.cpp',

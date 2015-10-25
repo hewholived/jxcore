@@ -45,6 +45,7 @@
 #include "jswrapper.h"
 #include "prmjtime.h"
 #include "jsoracle.h"
+#include "jsmonitor.h"
 
 #include "asmjs/AsmJSLink.h"
 #include "builtin/Eval.h"
@@ -668,9 +669,12 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
         JS_DestroyRuntime(rt);
         return nullptr;
     }
+    printf("Created a new runtime\n");
     if (file_exists("/tmp/enableMonitor")) {
         //printf("Created a new runtime\n");
     	jit::js_JitOptions.enableMonitor = true;
+    	JSMonitor* monitor = new JSMonitor();
+    	rt->SetJSMonitor(monitor);
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {
     	jit::js_JitOptions.enableOracle = true;
@@ -780,6 +784,7 @@ JS_SetContextCallback(JSRuntime *rt, JSContextCallback cxCallback, void *data)
 JS_PUBLIC_API(JSContext *)
 JS_NewContext(JSRuntime *rt, size_t stackChunkSize)
 {
+	printf("Created a new context\n");
     return NewContext(rt, stackChunkSize);
 }
 
@@ -787,6 +792,7 @@ JS_PUBLIC_API(void)
 JS_DestroyContext(JSContext *cx)
 {
     JS_ASSERT(!cx->compartment());
+    printf("Destroyed a context\n");
     DestroyContext(cx, DCM_FORCE_GC);
 }
 

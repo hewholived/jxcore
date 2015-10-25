@@ -534,6 +534,8 @@ void JXEngine::InitializeEngine(int argc, char **argv) {
 
   JSContext *ctx = main_iso_.GetRaw();
   JSRuntime *rt = JS_GetRuntime(ctx);
+  printf("%s\n", entry_file_name_.c_str());
+
   do {
     Init(argc, argv_copy, was_inited);
     do {

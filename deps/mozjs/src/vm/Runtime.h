@@ -43,6 +43,7 @@
 #include "vm/Symbol.h"
 #include "vm/ThreadPool.h"
 #include "jsoracle.h"
+#include "jsmonitor.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -1069,6 +1070,10 @@ struct JSRuntime : public JS::shadow::Runtime,
         this->oracle = oracle;
     }
     js::Oracle *oracle;
+    void SetJSMonitor(js::JSMonitor* jsmonitor) {
+    	this->jsmonitor = jsmonitor;
+    }
+    js::JSMonitor *jsmonitor;
   private:
     // Whether asm.js signal handlers have been installed and can be used for
     // performing interrupt checks in loops.
