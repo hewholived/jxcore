@@ -1927,8 +1927,14 @@ MBinaryArithInstruction::infer(TempAllocator &alloc, BaselineInspector *inspecto
         return inferFallback(inspector, pc);
 
     // If the operation has ever overflowed, use a double specialization.
-    if (inspector->hasSeenDoubleResult(pc))
+    bool retVal = inspector->hasSeenDoubleResult(pc);
+    if (jit::js_JitOptions.enableMonitor && retVal) {
+		JSScript *script = inspector->getScript();
+		printf("InspectorSeenDouble;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+	}
+    if (inspector->hasSeenDoubleResult(pc)) {
         setResultType(MIRType_Double);
+    }
 
     // If the operation will always overflow on its constant operands, use a
     // double specialization so that it can be constant folded later.
@@ -1972,6 +1978,10 @@ MBinaryArithInstruction::inferFallback(BaselineInspector *inspector,
 {
     // Try to specialize based on what baseline observed in practice.
     specialization_ = inspector->expectedBinaryArithSpecialization(pc);
+    if (jit::js_JitOptions.enableMonitor && specialization_ != MIRType_None) {
+    	JSScript *script = inspector->getScript();
+    	printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
+    }
     if (specialization_ != MIRType_None) {
         setResultType(specialization_);
         return;
@@ -2263,8 +2273,13 @@ MCompare::infer(BaselineInspector *inspector, jsbytecode *pc)
     // instruction's type policy to insert fallible unboxes to the appropriate
     // input types.
 
-    if (!strictEq)
+    if (!strictEq) {
         compareType_ = inspector->expectedCompareType(pc);
+        if (jit::js_JitOptions.enableMonitor && compareType_ != MCompare::Compare_Unknown) {
+        	JSScript *script = inspector->getScript();
+        	printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+        }
+    }
 }
 
 MBitNot *

@@ -663,25 +663,25 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
 
     JSRuntime *rt = js_new<JSRuntime>(parentRuntime);
     if (!rt)
-        return nullptr;
+    	return nullptr;
 
     if (!rt->init(maxbytes, maxNurseryBytes)) {
-        JS_DestroyRuntime(rt);
-        return nullptr;
+    	JS_DestroyRuntime(rt);
+    	return nullptr;
     }
-    printf("Created a new runtime\n");
+    //printf("Created a new runtime\n");
     if (file_exists("/tmp/enableMonitor")) {
-        //printf("Created a new runtime\n");
+    	//printf("Created a new runtime\n");
     	jit::js_JitOptions.enableMonitor = true;
     	JSMonitor* monitor = new JSMonitor();
     	rt->SetJSMonitor(monitor);
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {
     	jit::js_JitOptions.enableOracle = true;
-	const char* oracleFile = "/tmp/oracleFile.or";
-	Oracle *oracle = new Oracle();
-	oracle->init(oracleFile);
-	rt->SetOracle(oracle);
+    	const char* oracleFile = "/tmp/oracleFile.or";
+    	Oracle *oracle = new Oracle();
+    	oracle->init(oracleFile);
+    	rt->SetOracle(oracle);
     }
 
     return rt;

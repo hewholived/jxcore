@@ -22,6 +22,8 @@ namespace js {
       
       JSMonitor();
       void updateBytecodeType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
+      void recordShapeDeopt(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
+      void recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column);
       ~JSMonitor();
   };
 }

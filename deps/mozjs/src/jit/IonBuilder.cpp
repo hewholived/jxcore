@@ -7360,6 +7360,11 @@ IonBuilder::getElemTryCache(bool *emitted, MDefinition *obj, MDefinition *index)
     // Turn off cacheing if the element is int32 and we've seen non-native objects as the target
     // of this getelem.
     bool nonNativeGetElement = inspector->hasSeenNonNativeGetElement(pc);
+    if (jit::js_JitOptions.enableMonitor && nonNativeGetElement) {
+		JSScript *script = inspector->getScript();
+		printf("InspectorNonNativeGetElem;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), nonNativeGetElement);
+	}
+
     if (index->mightBeType(MIRType_Int32) && nonNativeGetElement)
         return true;
 
@@ -9228,7 +9233,13 @@ IonBuilder::getPropTryCache(bool *emitted, MDefinition *obj, PropertyName *name,
 
     // Since getters have no guaranteed return values, we must barrier in order to be
     // able to attach stubs for them.
-    if (inspector->hasSeenAccessedGetter(pc))
+    bool retVal = inspector->hasSeenAccessedGetter(pc);
+    if (jit::js_JitOptions.enableMonitor && retVal) {
+		JSScript *script = inspector->getScript();
+		printf("InspectorSeenAccessedGetter;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+	}
+
+    if (retVal)
         barrier = BarrierKind::TypeSet;
 
     if (needsToMonitorMissingProperties(types))
@@ -10092,7 +10103,13 @@ IonBuilder::jsop_iternext()
     if (!resumeAfter(ins))
         return false;
 
-    if (!nonStringIteration_ && !inspector->hasSeenNonStringIterNext(pc)) {
+    bool retVal = inspector->hasSeenNonStringIterNext(pc);
+    if (jit::js_JitOptions.enableMonitor && retVal) {
+		JSScript *script = inspector->getScript();
+		printf("InspectorSeenNonString;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+	}
+
+    if (!nonStringIteration_ && !retVal) {
         ins = MUnbox::New(alloc(), ins, MIRType_String, MUnbox::Fallible,
                           Bailout_NonStringInputInvalidate);
         current->add(ins);

@@ -1402,8 +1402,8 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     uint32_t *addressOfUseCount() { return &useCount; }
     static size_t offsetOfUseCount() { return offsetof(JSScript, useCount); }
     void resetUseCount() {
-    	if (js::jit::js_JitOptions.enableMonitor)
-    		printf("Count reset for:%s;%d;%d\n", filename(), lineno_, column_);
+//    	if (js::jit::js_JitOptions.enableMonitor)
+//    		printf("Count reset for:%s;%d;%d\n", filename(), lineno_, column_);
     	useCount = 0;
     }
 
