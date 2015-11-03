@@ -1227,7 +1227,7 @@ class DebugScopeProxy : public BaseProxyHandler
                 }
 
                 if (action == SET)
-                    TypeScript::SetArgument(cx, script, i, vp);
+                    TypeScript::SetArgument(cx, script, i, vp, nullptr);
             }
 
             *accessResult = ACCESS_UNALIASED;

@@ -2767,7 +2767,7 @@ jit::AnalyzeNewScriptProperties(JSContext *cx, JSFunction *fun,
             return true;
     }
 
-    types::TypeScript::SetThis(cx, script, types::Type::ObjectType(type));
+    types::TypeScript::SetThis(cx, script, types::Type::ObjectType(type), NULL);
 
     MIRGraph graph(&temp);
     InlineScriptTree *inlineScriptTree = InlineScriptTree::New(&temp, nullptr, nullptr, script);
@@ -2788,11 +2788,11 @@ jit::AnalyzeNewScriptProperties(JSContext *cx, JSFunction *fun,
         return false;
     }
 
-    BaselineInspector inspector(script);
+    BaselineInspector inspector(script, cx->runtime());
     const JitCompileOptions options(cx);
 
     IonBuilder builder(cx, CompileCompartment::get(cx->compartment()), options, &temp, &graph, constraints,
-                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr);
+                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx->runtime());
 
     if (!builder.build()) {
         if (builder.abortReason() == AbortReason_Alloc)
@@ -3015,11 +3015,11 @@ jit::AnalyzeArgumentsUsage(JSContext *cx, JSScript *scriptArg)
     if (!constraints)
         return false;
 
-    BaselineInspector inspector(script);
+    BaselineInspector inspector(script, cx->runtime());
     const JitCompileOptions options(cx);
 
     IonBuilder builder(nullptr, CompileCompartment::get(cx->compartment()), options, &temp, &graph, constraints,
-                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr);
+                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx->runtime());
 
     if (!builder.build()) {
         if (builder.abortReason() == AbortReason_Alloc)

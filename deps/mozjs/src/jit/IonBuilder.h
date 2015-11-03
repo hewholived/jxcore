@@ -215,7 +215,7 @@ class IonBuilder : public MIRGenerator
                MIRGraph *graph, types::CompilerConstraintList *constraints,
                BaselineInspector *inspector, CompileInfo *info,
                const OptimizationInfo *optimizationInfo, BaselineFrameInspector *baselineFrame,
-               size_t inliningDepth = 0, uint32_t loopDepth = 0);
+               JSRuntime *runtime, size_t inliningDepth = 0, uint32_t loopDepth = 0);
 
     bool build();
     bool buildInline(IonBuilder *callerBuilder, MResumePoint *callerResumePoint,
@@ -937,6 +937,8 @@ class IonBuilder : public MIRGenerator
 
     // If this is an inline builder, the call info for the builder.
     const CallInfo *inlineCallInfo_;
+
+    JSRuntime *runtime;
 };
 
 class CallInfo

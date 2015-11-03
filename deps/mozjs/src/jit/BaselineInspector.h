@@ -46,10 +46,11 @@ class BaselineInspector
   private:
     JSScript *script;
     ICEntry *prevLookedUpEntry;
+    JSRuntime *runtime;
 
   public:
-    explicit BaselineInspector(JSScript *script)
-      : script(script), prevLookedUpEntry(nullptr)
+    explicit BaselineInspector(JSScript *script, JSRuntime *runtime)
+      : script(script), prevLookedUpEntry(nullptr), runtime(runtime)
     {
         JS_ASSERT(script);
     }
@@ -64,6 +65,10 @@ class BaselineInspector
 
     JSScript *getScript() {
     	return script;
+    }
+
+    JSRuntime *getRuntime() {
+    	return runtime;
     }
 
   private:

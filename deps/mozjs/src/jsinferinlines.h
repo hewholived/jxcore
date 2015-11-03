@@ -784,7 +784,7 @@ TypeScript::MonitorAssign(JSContext *cx, HandleObject obj, jsid id)
 }
 
 /* static */ inline void
-TypeScript::SetThis(JSContext *cx, JSScript *script, Type type)
+TypeScript::SetThis(JSContext *cx, JSScript *script, Type type, jsbytecode *pc)
 {
     if (!script->types)
         return;
@@ -795,17 +795,20 @@ TypeScript::SetThis(JSContext *cx, JSScript *script, Type type)
         InferSpew(ISpewOps, "externalType: setThis #%u: %s",
                   script->id(), TypeString(type));
         ThisTypes(script)->addType(cx, type);
+        if (jit::js_JitOptions.enableMonitor && pc != NULL)
+        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
+        	    							script->getUseCount());
     }
 }
 
 /* static */ inline void
-TypeScript::SetThis(JSContext *cx, JSScript *script, const js::Value &value)
+TypeScript::SetThis(JSContext *cx, JSScript *script, const js::Value &value, jsbytecode *pc)
 {
-    SetThis(cx, script, GetValueType(value));
+    SetThis(cx, script, GetValueType(value), pc);
 }
 
 /* static */ inline void
-TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type)
+TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type, jsbytecode *pc)
 {
     if (!script->types)
         return;
@@ -816,14 +819,17 @@ TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type
         InferSpew(ISpewOps, "externalType: setArg #%u %u: %s",
                   script->id(), arg, TypeString(type));
         ArgTypes(script, arg)->addType(cx, type);
+        if (jit::js_JitOptions.enableMonitor && pc != nullptr)
+        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
+        			script->getUseCount());
     }
 }
 
 /* static */ inline void
-TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, const js::Value &value)
+TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, const js::Value &value, jsbytecode *pc)
 {
     Type type = GetValueType(value);
-    SetArgument(cx, script, arg, type);
+    SetArgument(cx, script, arg, type, pc);
 }
 
 /////////////////////////////////////////////////////////////////////

@@ -1930,7 +1930,8 @@ MBinaryArithInstruction::infer(TempAllocator &alloc, BaselineInspector *inspecto
     bool retVal = inspector->hasSeenDoubleResult(pc);
     if (jit::js_JitOptions.enableMonitor && retVal) {
 		JSScript *script = inspector->getScript();
-		printf("InspectorSeenDouble;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+		//printf("InspectorSeenDouble;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+		inspector->getRuntime()->jsmonitor->setSeenDouble(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 	}
     if (inspector->hasSeenDoubleResult(pc)) {
         setResultType(MIRType_Double);
@@ -1980,7 +1981,8 @@ MBinaryArithInstruction::inferFallback(BaselineInspector *inspector,
     specialization_ = inspector->expectedBinaryArithSpecialization(pc);
     if (jit::js_JitOptions.enableMonitor && specialization_ != MIRType_None) {
     	JSScript *script = inspector->getScript();
-    	printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
+    	//printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
+    	inspector->getRuntime()->jsmonitor->setBinaryType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
     }
     if (specialization_ != MIRType_None) {
         setResultType(specialization_);
@@ -2277,7 +2279,8 @@ MCompare::infer(BaselineInspector *inspector, jsbytecode *pc)
         compareType_ = inspector->expectedCompareType(pc);
         if (jit::js_JitOptions.enableMonitor && compareType_ != MCompare::Compare_Unknown) {
         	JSScript *script = inspector->getScript();
-        	printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+        	//printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+        	inspector->getRuntime()->jsmonitor->setCompareType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
         }
     }
 }

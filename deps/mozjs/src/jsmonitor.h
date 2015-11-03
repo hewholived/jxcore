@@ -24,6 +24,16 @@ namespace js {
       void updateBytecodeType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
       void recordShapeDeopt(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
       void recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column);
+      void updateObjectTypeCount(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int invocCount);
+      //void shapeUpdateCount(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int invocCount);
+      void setInspectorResultType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
+      void setCompareType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
+      void setNonNativeGetElem(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
+      void setSeenNonString(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
+      void setSeenDouble(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
+      void setBinaryType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
+      void setSeenAccessedGetter(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
+
       ~JSMonitor();
   };
 }

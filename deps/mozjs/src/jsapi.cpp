@@ -671,7 +671,7 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
     }
     //printf("Created a new runtime\n");
     if (file_exists("/tmp/enableMonitor")) {
-    	//printf("Created a new runtime\n");
+    	printf("Created a new runtime\n");
     	jit::js_JitOptions.enableMonitor = true;
     	JSMonitor* monitor = new JSMonitor();
     	rt->SetJSMonitor(monitor);
@@ -690,6 +690,7 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
 JS_PUBLIC_API(void)
 JS_DestroyRuntime(JSRuntime *rt)
 {
+	printf("Destroying runtime\n");
     js_delete(rt);
 }
 

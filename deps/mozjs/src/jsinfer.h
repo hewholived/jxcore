@@ -1265,11 +1265,11 @@ class TypeScript
     static inline void MonitorAssign(JSContext *cx, HandleObject obj, jsid id);
 
     /* Add a type for a variable in a script. */
-    static inline void SetThis(JSContext *cx, JSScript *script, Type type);
-    static inline void SetThis(JSContext *cx, JSScript *script, const js::Value &value);
-    static inline void SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type);
+    static inline void SetThis(JSContext *cx, JSScript *script, Type type, jsbytecode *pc);
+    static inline void SetThis(JSContext *cx, JSScript *script, const js::Value &value, jsbytecode *pc);
+    static inline void SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type, jsbytecode *pc);
     static inline void SetArgument(JSContext *cx, JSScript *script, unsigned arg,
-                                   const js::Value &value);
+                                   const js::Value &value, jsbytecode *pc);
 
     /*
      * Freeze all the stack type sets in a script, for a compilation. Returns

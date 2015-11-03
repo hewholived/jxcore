@@ -1800,7 +1800,7 @@ js::CreateThisForFunctionWithProto(JSContext *cx, HandleObject callee, JSObject 
         JSScript *script = callee->as<JSFunction>().getOrCreateScript(cx);
         if (!script)
             return nullptr;
-        TypeScript::SetThis(cx, script, types::Type::ObjectType(res));
+        TypeScript::SetThis(cx, script, types::Type::ObjectType(res), nullptr);
     }
 
     return res;
@@ -1826,7 +1826,7 @@ js::CreateThisForFunction(JSContext *cx, HandleObject callee, NewObjectKind newK
         JSObject::clear(cx, nobj);
 
         JSScript *calleeScript = callee->as<JSFunction>().nonLazyScript();
-        TypeScript::SetThis(cx, calleeScript, types::Type::ObjectType(nobj));
+        TypeScript::SetThis(cx, calleeScript, types::Type::ObjectType(nobj), nullptr);
 
         return nobj;
     }

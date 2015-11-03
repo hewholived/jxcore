@@ -878,9 +878,9 @@ InitFromBailout(JSContext *cx, HandleScript caller, jsbytecode *callerPC,
             BailoutKindString(bailoutKind));
 #endif
     if (js_JitOptions.enableMonitor) {
-      printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(), 
-                                              (int) script->lineno(), (int) script->column(), 
-                                              pcOff, BailoutKindString(bailoutKind));
+//      printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(),
+//                                              (int) script->lineno(), (int) script->column(),
+//                                              pcOff, BailoutKindString(bailoutKind));
     }
 
     // If this was the last inline frame, or we are bailing out to a catch or

@@ -3596,7 +3596,7 @@ types::TypeMonitorCallSlow(JSContext *cx, JSObject *callee, const CallArgs &args
     JSScript *script = callee->as<JSFunction>().nonLazyScript();
 
     if (!constructing)
-        TypeScript::SetThis(cx, script, args.thisv());
+        TypeScript::SetThis(cx, script, args.thisv(), nullptr);
 
     /*
      * Add constraints going up to the minimum of the actual and formal count.
@@ -3605,11 +3605,11 @@ types::TypeMonitorCallSlow(JSContext *cx, JSObject *callee, const CallArgs &args
      */
     unsigned arg = 0;
     for (; arg < args.length() && arg < nargs; arg++)
-        TypeScript::SetArgument(cx, script, arg, args[arg]);
+        TypeScript::SetArgument(cx, script, arg, args[arg], nullptr);
 
     /* Watch for fewer actuals than formals to the call. */
     for (; arg < nargs; arg++)
-        TypeScript::SetArgument(cx, script, arg, UndefinedValue());
+        TypeScript::SetArgument(cx, script, arg, UndefinedValue(), nullptr);
 }
 
 static inline bool
@@ -3698,6 +3698,16 @@ types::TypeMonitorResult(JSContext *cx, JSScript *script, jsbytecode *pc, const 
     StackTypeSet *types = TypeScript::BytecodeTypes(script, pc);
     if (types->hasType(type))
         return;
+
+    if (jit::js_JitOptions.enableMonitor) {
+    	if (!type.isPrimitive())
+    		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
+    		    							script->getUseCount());
+    	else
+    		cx->runtime()->jsmonitor->updateBytecodeType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), rval.isDouble() ? JSVAL_TYPE_DOUBLE : rval.extractNonDoubleType());
+
+    }
+
 
     InferSpew(ISpewOps, "bytecodeType: #%u:%05u: %s",
               script->id(), script->pcToOffset(pc), TypeString(type));

@@ -214,8 +214,6 @@ BaselineInspector::expectedResultType(jsbytecode *pc)
         //return MIRType_None;
     }
 
-    if (jit::js_JitOptions.enableMonitor)
-    	printf("InspectorResultType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retType);
     return retType;
 }
 

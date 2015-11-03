@@ -629,7 +629,7 @@ js::ExecuteKernel(JSContext *cx, HandleScript script, JSObject &scopeChainArg, c
         return true;
     }
 
-    TypeScript::SetThis(cx, script, thisv);
+    TypeScript::SetThis(cx, script, thisv, nullptr);
 
     probes::StartExecution(script);
     ExecuteState state(cx, script, thisv, scopeChainArg, type, evalInFrame, result);
