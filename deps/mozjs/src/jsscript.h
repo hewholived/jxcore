@@ -824,6 +824,7 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
                                  * ion, also increased for any inlined scripts.
                                  * Reset if the script's JIT code is forcibly
                                  * discarded. */
+    uint32_t		tsCount;
 
 #ifdef DEBUG
     // Unique identifier within the compartment for this script, used for
@@ -1398,13 +1399,19 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     uint32_t getUseCount() const {
         return useCount;
     }
+    uint32_t getTSCount() const {
+    	return tsCount;
+    }
     uint32_t incUseCount(uint32_t amount = 1) { return useCount += amount; }
+    void setTSCount(uint32_t count) { if (tsCount < count) tsCount = count; }
     uint32_t *addressOfUseCount() { return &useCount; }
     static size_t offsetOfUseCount() { return offsetof(JSScript, useCount); }
     void resetUseCount() {
-//    	if (js::jit::js_JitOptions.enableMonitor)
-//    		printf("Count reset for:%s;%d;%d\n", filename(), lineno_, column_);
     	useCount = 0;
+    }
+    void resetTSCount() {
+    	// Call this only when the function is deoptimized.
+    	tsCount = 0;
     }
 
   public:

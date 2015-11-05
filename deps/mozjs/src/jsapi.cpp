@@ -670,15 +670,15 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
     	return nullptr;
     }
     //printf("Created a new runtime\n");
-    if (file_exists("/tmp/enableMonitor")) {
-    	printf("Created a new runtime\n");
+    if (file_exists("/tmp/enableMonitor")  || jit::js_JitOptions.enableMonitor) {
+    	//printf("Created a new runtime\n");
     	jit::js_JitOptions.enableMonitor = true;
     	JSMonitor* monitor = new JSMonitor();
     	rt->SetJSMonitor(monitor);
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {
     	jit::js_JitOptions.enableOracle = true;
-    	const char* oracleFile = "/tmp/oracleFile.or";
+    	const char* oracleFile = "/tmp/monitor.db";
     	Oracle *oracle = new Oracle();
     	oracle->init(oracleFile);
     	rt->SetOracle(oracle);
@@ -690,7 +690,7 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
 JS_PUBLIC_API(void)
 JS_DestroyRuntime(JSRuntime *rt)
 {
-	printf("Destroying runtime\n");
+	//printf("Destroying runtime\n");
     js_delete(rt);
 }
 
@@ -785,7 +785,7 @@ JS_SetContextCallback(JSRuntime *rt, JSContextCallback cxCallback, void *data)
 JS_PUBLIC_API(JSContext *)
 JS_NewContext(JSRuntime *rt, size_t stackChunkSize)
 {
-	printf("Created a new context\n");
+	//printf("Created a new context\n");
     return NewContext(rt, stackChunkSize);
 }
 
@@ -793,7 +793,7 @@ JS_PUBLIC_API(void)
 JS_DestroyContext(JSContext *cx)
 {
     JS_ASSERT(!cx->compartment());
-    printf("Destroyed a context\n");
+    //printf("Destroyed a context\n");
     DestroyContext(cx, DCM_FORCE_GC);
 }
 

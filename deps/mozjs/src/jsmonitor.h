@@ -19,6 +19,8 @@ namespace js {
 
     public:
       sqlite3 *monitorDb;
+      sqlite3 *hotDb;
+      sqlite3 *objTypesDb;
       
       JSMonitor();
       void updateBytecodeType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);

@@ -11,17 +11,28 @@ js::JSMonitor::JSMonitor() {
 		return;
 	}
 
+	//if (sqlite3_open(":memory:", &hotDb) != 0) {
+	if (sqlite3_open("hot.db", &hotDb) != 0) {
+		printf("Hot: Db init error.\n");
+		return;
+	}
+
+	if (sqlite3_open("objTypes.db", &objTypesDb) != 0) {
+		printf("ObjTypes: Db init error.\n");
+		return;
+	}
+
 	sql = "CREATE TABLE HOTFUNCS("  \
 			"NAME           CHAR(100)    NOT NULL," \
 			"LINENO         INT         NOT NULL," \
 			"COLUMNNO       INT         NOT NULL," \
 			"PRIMARY KEY(NAME, LINENO, COLUMNNO));";
 
-	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
+	rc = sqlite3_exec(hotDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: Init %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
-		return;
+		//return;
 	}else{
 		//fprintf(stdout, "Table created successfully\n");
 	}
@@ -38,7 +49,7 @@ js::JSMonitor::JSMonitor() {
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
-		return;
+		//return;
 	}else{
 		//fprintf(stdout, "Table created successfully\n");
 	}
@@ -54,7 +65,7 @@ js::JSMonitor::JSMonitor() {
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
-		return;
+		//return;
 	}else{
 		//fprintf(stdout, "Table created successfully\n");
 	}
@@ -63,15 +74,14 @@ js::JSMonitor::JSMonitor() {
 			"NAME           CHAR(100)    NOT NULL," \
 			"LINENO         INT         NOT NULL," \
 			"COLUMNNO       INT         NOT NULL," \
-			"PCOFFSET       INT         NOT NULL," \
 			"INVOCCOUNT     INT         NOT NULL," \
-			"UNIQUE (NAME, LINENO, COLUMNNO, PCOFFSET));";
+			"UNIQUE (NAME, LINENO, COLUMNNO));";
 
-	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
+	rc = sqlite3_exec(objTypesDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
-		return;
+		//return;
 	}else{
 		//fprintf(stdout, "Table created successfully\n");
 	}
@@ -88,7 +98,7 @@ js::JSMonitor::JSMonitor() {
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
-		return;
+		//return;
 	}else{
 		//fprintf(stdout, "Table created successfully\n");
 	}
@@ -136,10 +146,23 @@ js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, lon
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
+	int trys = 5;
+
 	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, LINENO, COLUMNNO) VALUES ('%s', %d, %d)", fileName,lineNo, column);
-	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+	rc = sqlite3_exec(hotDb, buff, callback, 0, &zErrMsg);
+//	while(rc != SQLITE_OK){
+//		trys--;
+//		sqlite3_free(zErrMsg);
+//		if (trys == 0)
+//			break;
+//		rc = sqlite3_exec(hotDb, buff, callback, 0, &zErrMsg);
+//	}
+//	if( rc != SQLITE_OK ){
+//		printf("Error updating hotfunc database;\n");
+//	}
+//
 	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
 	}else{
@@ -154,15 +177,15 @@ js::JSMonitor::updateObjectTypeCount(const char* fileName, long unsigned int lin
 	char *zErrMsg = 0;
 	char buff[1000];
 
-	sprintf(buff,"INSERT OR REPLACE INTO OBJECTTYPES (NAME, LINENO, COLUMNNO, PCOFFSET, INVOCCOUNT) VALUES ('%s', %d, %d, %d, "\
-			"COALESCE((SELECT INVOCCOUNT FROM OBJECTTYPES WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d AND PCOFFSET=%d AND INVOCCOUNT>%d), %d))",
-			fileName, lineNo, column, pc, fileName, lineNo, column, pc, invocCount, invocCount);
-	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+	sprintf(buff,"INSERT OR REPLACE INTO OBJECTTYPES (NAME, LINENO, COLUMNNO, INVOCCOUNT) VALUES ('%s', %d, %d, "\
+			"COALESCE((SELECT INVOCCOUNT FROM OBJECTTYPES WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d AND INVOCCOUNT>%d), %d))",
+			fileName, lineNo, column, fileName, lineNo, column, invocCount, invocCount);
+	rc = sqlite3_exec(objTypesDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: OBJECTTYPES %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: OBJECTTYPES %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
-	}else{
+	} else {
 		//fprintf(stdout, "Value Inserted successfully\n");
 	}
 }
@@ -175,7 +198,7 @@ js::JSMonitor::setInspectorResultType(const char* fileName, long unsigned int li
 	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, LINENO, COLUMNNO, PCOFFSET, TYPE) VALUES ('%s', %d, %d, %d, %d)", fileName,lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
 	}else{
@@ -215,4 +238,6 @@ js::JSMonitor::setSeenAccessedGetter(const char* fileName, long unsigned int lin
 }
 js::JSMonitor::~JSMonitor() {
 	sqlite3_close(monitorDb);
+	sqlite3_close(hotDb);
+	sqlite3_close(objTypesDb);
 }
