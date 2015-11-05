@@ -5,32 +5,42 @@ js::JSMonitor::JSMonitor() {
 	int rc = 0;
 	char *zErrMsg = 0;
 
+	rc = sqlite3_enable_shared_cache(1);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: Could not enable shared cache %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		//return;
+	}else{
+		//fprintf(stdout, "Table created successfully\n");
+	}
+
 	//if (sqlite3_open(":memory:", &monitorDb) != 0) {
 	if (sqlite3_open("monitor.db", &monitorDb) != 0) {
 		printf("Monitor: Db init error.\n");
 		return;
 	}
 
-	//if (sqlite3_open(":memory:", &hotDb) != 0) {
-	if (sqlite3_open("hot.db", &hotDb) != 0) {
-		printf("Hot: Db init error.\n");
-		return;
-	}
-
-	if (sqlite3_open("objTypes.db", &objTypesDb) != 0) {
-		printf("ObjTypes: Db init error.\n");
-		return;
-	}
+//	//if (sqlite3_open(":memory:", &hotDb) != 0) {
+//	if (sqlite3_open("hot.db", &hotDb) != 0) {
+//		printf("Hot: Db init error.\n");
+//		return;
+//	}
+//
+//	if (sqlite3_open("objTypes.db", &objTypesDb) != 0) {
+//		printf("ObjTypes: Db init error.\n");
+//		return;
+//	}
 
 	sql = "CREATE TABLE HOTFUNCS("  \
 			"NAME           CHAR(100)    NOT NULL," \
 			"LINENO         INT         NOT NULL," \
 			"COLUMNNO       INT         NOT NULL," \
+			"TSCOUNT		INT			NOT NULL," \
 			"PRIMARY KEY(NAME, LINENO, COLUMNNO));";
 
-	rc = sqlite3_exec(hotDb, sql, callback, 0, &zErrMsg);
+	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: Init %s\n", zErrMsg);
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		//return;
 	}else{
@@ -47,7 +57,7 @@ js::JSMonitor::JSMonitor() {
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		//return;
 	}else{
@@ -63,7 +73,7 @@ js::JSMonitor::JSMonitor() {
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		//return;
 	}else{
@@ -77,9 +87,9 @@ js::JSMonitor::JSMonitor() {
 			"INVOCCOUNT     INT         NOT NULL," \
 			"UNIQUE (NAME, LINENO, COLUMNNO));";
 
-	rc = sqlite3_exec(objTypesDb, sql, callback, 0, &zErrMsg);
-	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
+	if( rc != SQLITE_OK){
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		//return;
 	}else{
@@ -96,7 +106,7 @@ js::JSMonitor::JSMonitor() {
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		//return;
 	}else{
@@ -115,8 +125,9 @@ js::JSMonitor::updateBytecodeType(const char* fileName, long unsigned int lineNo
 	char buff[500];
 	sprintf(buff,"INSERT INTO TYPES (NAME, LINENO, COLUMNNO, PCOFFSET, TYPE) VALUES ('%s', %d, %d, %d, %d)", fileName,lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
-	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+	//if( rc != SQLITE_OK ){
+	if( rc != SQLITE_CONSTRAINT ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
 	}else{
@@ -131,8 +142,9 @@ js::JSMonitor::recordShapeDeopt(const char* fileName, long unsigned int lineNo, 
 	char buff[500];
 	sprintf(buff,"INSERT INTO SHAPESDEOPT (NAME, LINENO, COLUMNNO, PCOFFSET) VALUES ('%s', %d, %d, %d)", fileName,lineNo, column, pc);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
-	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: SHAPESDEOPT %s\n", zErrMsg);
+	//if( rc != SQLITE_OK ){
+	if( rc != SQLITE_CONSTRAINT ){
+		fprintf(stderr, "SQL error: SHAPESDEOPT %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
 	}else{
@@ -141,15 +153,15 @@ js::JSMonitor::recordShapeDeopt(const char* fileName, long unsigned int lineNo, 
 }
 
 void
-js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column)
+js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column, uint32_t tsCount)
 {
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
-	int trys = 5;
+	//int trys = 5;
 
-	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, LINENO, COLUMNNO) VALUES ('%s', %d, %d)", fileName,lineNo, column);
-	rc = sqlite3_exec(hotDb, buff, callback, 0, &zErrMsg);
+	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, LINENO, COLUMNNO, TSCOUNT) VALUES ('%s', %d, %d, %d)", fileName,lineNo, column, tsCount);
+	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 //	while(rc != SQLITE_OK){
 //		trys--;
 //		sqlite3_free(zErrMsg);
@@ -161,7 +173,8 @@ js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, lon
 //		printf("Error updating hotfunc database;\n");
 //	}
 //
-	if( rc != SQLITE_OK ){
+	if( rc != SQLITE_CONSTRAINT ){
+	//if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
@@ -180,8 +193,9 @@ js::JSMonitor::updateObjectTypeCount(const char* fileName, long unsigned int lin
 	sprintf(buff,"INSERT OR REPLACE INTO OBJECTTYPES (NAME, LINENO, COLUMNNO, INVOCCOUNT) VALUES ('%s', %d, %d, "\
 			"COALESCE((SELECT INVOCCOUNT FROM OBJECTTYPES WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d AND INVOCCOUNT>%d), %d))",
 			fileName, lineNo, column, fileName, lineNo, column, invocCount, invocCount);
-	rc = sqlite3_exec(objTypesDb, buff, callback, 0, &zErrMsg);
-	if( rc != SQLITE_OK ){
+	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+	//if( rc != SQLITE_OK ){
+	if( rc != SQLITE_CONSTRAINT ){
 		fprintf(stderr, "SQL error: OBJECTTYPES %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
@@ -197,7 +211,8 @@ js::JSMonitor::setInspectorResultType(const char* fileName, long unsigned int li
 	char buff[500];
 	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, LINENO, COLUMNNO, PCOFFSET, TYPE) VALUES ('%s', %d, %d, %d, %d)", fileName,lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
-	if( rc != SQLITE_OK ){
+	//if( rc != SQLITE_OK ){
+	if( rc != SQLITE_CONSTRAINT ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
@@ -238,6 +253,4 @@ js::JSMonitor::setSeenAccessedGetter(const char* fileName, long unsigned int lin
 }
 js::JSMonitor::~JSMonitor() {
 	sqlite3_close(monitorDb);
-	sqlite3_close(hotDb);
-	sqlite3_close(objTypesDb);
 }

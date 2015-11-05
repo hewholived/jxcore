@@ -19,13 +19,13 @@ namespace js {
 
     public:
       sqlite3 *monitorDb;
-      sqlite3 *hotDb;
-      sqlite3 *objTypesDb;
+//      sqlite3 *hotDb;
+//      sqlite3 *objTypesDb;
       
       JSMonitor();
       void updateBytecodeType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
       void recordShapeDeopt(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
-      void recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column);
+      void recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column, uint32_t tsCount);
       void updateObjectTypeCount(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int invocCount);
       //void shapeUpdateCount(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int invocCount);
       void setInspectorResultType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);

@@ -188,7 +188,7 @@ class Oracle {
 	}
 
     static int hotFunCallback(void *oraclePtr, int argc, char **argv, char **azColName){
-    	Oracle *oracle = (Oracle *) oraclePtr;
+    	//Oracle *oracle = (Oracle *) oraclePtr;
     	int i;
     	for(i = 0; i < argc; i++){
     		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
@@ -197,12 +197,12 @@ class Oracle {
     	return 0;
     }
     void init(const char* fname) {
-    	char* jsFile = (char *)malloc(sizeof(char) * 2051);
-    	char types[100];
+    	//char* jsFile = (char *)malloc(sizeof(char) * 2051);
+    	//char types[100];
     	//int lineNo, pc, offset, shapeID, isFixedSlot;
-    	int lineNo, column, pc;
+    	//int lineNo, column, pc;
 
-    	char *sql;
+    	const char *sql;
     	int rc = 0;
     	char *zErrMsg = 0;
 

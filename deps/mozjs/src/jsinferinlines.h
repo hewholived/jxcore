@@ -796,8 +796,7 @@ TypeScript::SetThis(JSContext *cx, JSScript *script, Type type, jsbytecode *pc)
                   script->id(), TypeString(type));
         ThisTypes(script)->addType(cx, type);
         if (jit::js_JitOptions.enableMonitor && pc != NULL)
-        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
-        	    							script->getUseCount());
+        	script->setTSCount(script->getUseCount());
     }
 }
 
@@ -820,8 +819,7 @@ TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type
                   script->id(), arg, TypeString(type));
         ArgTypes(script, arg)->addType(cx, type);
         if (jit::js_JitOptions.enableMonitor && pc != nullptr)
-        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
-        			script->getUseCount());
+        	script->setTSCount(script->getUseCount());
     }
 }
 

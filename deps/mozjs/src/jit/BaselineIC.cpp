@@ -1314,12 +1314,8 @@ DoTypeMonitorFallback(JSContext *cx, BaselineFrame *frame, ICTypeMonitor_Fallbac
     if (stub->monitorsThis()) {
         JS_ASSERT(pc == script->code());
         types::TypeScript::SetThis(cx, script, value, pc);
-        if (jit::js_JitOptions.enableMonitor)
-        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
     } else if (stub->monitorsArgument(&argument)) {
         JS_ASSERT(pc == script->code());
-        if (jit::js_JitOptions.enableMonitor)
-        	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
         types::TypeScript::SetArgument(cx, script, argument, value, pc);
     } else {
         types::TypeScript::Monitor(cx, script, pc, value);
@@ -1561,8 +1557,7 @@ DoTypeUpdateFallback(JSContext *cx, BaselineFrame *frame, ICUpdatedStub *stub, H
     }
 
     if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc = stub->getChainFallback()->icEntry()->pc(script);
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     return stub->addUpdateStubForValue(cx, script, obj, id, value);
@@ -1708,7 +1703,7 @@ DoThisFallback(JSContext *cx, ICThis_Fallback *stub, HandleValue thisv, MutableH
     if (jit::js_JitOptions.enableMonitor) {
     	jsbytecode *pc;
     	JSScript *script = cx->currentScript(&pc);
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
     JSObject *thisObj = BoxNonStrictThis(cx, thisv);
     if (!thisObj)
@@ -1824,11 +1819,6 @@ DoCompareFallback(JSContext *cx, BaselineFrame *frame, ICCompare_Fallback *stub_
     // generating stubs.
     RootedValue lhsCopy(cx, lhs);
     RootedValue rhsCopy(cx, rhs);
-
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
-    }
 
     // Perform the compare operation.
     bool out;
@@ -4058,9 +4048,6 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
     // Don't pass lhs directly, we need it when generating stubs.
     RootedValue lhsCopy(cx, lhs);
 
-    if (jit::js_JitOptions.enableMonitor) {
-		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
-	}
     bool isOptimizedArgs = false;
     if (lhs.isMagic(JS_OPTIMIZED_ARGUMENTS)) {
         // Handle optimized arguments[i] access.
@@ -4098,6 +4085,10 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
         // But for now we just bail.
         return true;
     }
+
+    if (jit::js_JitOptions.enableMonitor) {
+		script->setTSCount(script->getUseCount());
+	}
 
     // Try to attach an optimized stub.
     if (!TryAttachGetElemStub(cx, frame->script(), pc, stub, lhs, rhs, res))
@@ -5083,7 +5074,7 @@ DoSetElemFallback(JSContext *cx, BaselineFrame *frame, ICSetElem_Fallback *stub_
         return true;
     }
     if (jit::js_JitOptions.enableMonitor) {
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     // Try to generate new stubs.
@@ -5918,7 +5909,7 @@ DoGetNameFallback(JSContext *cx, BaselineFrame *frame, ICGetName_Fallback *stub_
             return false;
     }
     if (jit::js_JitOptions.enableMonitor) {
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     return true;
@@ -6032,7 +6023,7 @@ DoBindNameFallback(JSContext *cx, BaselineFrame *frame, ICBindName_Fallback *stu
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     res.setObject(*scope);
@@ -6096,7 +6087,7 @@ DoGetIntrinsicFallback(JSContext *cx, BaselineFrame *frame, ICGetIntrinsic_Fallb
         return false;
 
     if (jit::js_JitOptions.enableMonitor) {
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     stub->addNewStub(newStub);
@@ -6603,7 +6594,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     bool attached = false;
@@ -6620,7 +6611,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    		script->setTSCount(script->getUseCount());
     	}
         return true;
     }
@@ -6632,7 +6623,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    		script->setTSCount(script->getUseCount());
     	}
         return true;
     }
@@ -6643,7 +6634,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         if (attached) {
         	if (jit::js_JitOptions.enableMonitor) {
         		JSScript *script = frame->script();
-        		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+        		script->setTSCount(script->getUseCount());
         	}
             return true;
         }
@@ -6656,7 +6647,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         if (attached) {
         	if (jit::js_JitOptions.enableMonitor) {
         		JSScript *script = frame->script();
-        		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+        		script->setTSCount(script->getUseCount());
         	}
             return true;
         }
@@ -7665,7 +7656,7 @@ DoSetPropFallback(JSContext *cx, BaselineFrame *frame, ICSetProp_Fallback *stub_
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     bool attached = false;
@@ -7677,7 +7668,7 @@ DoSetPropFallback(JSContext *cx, BaselineFrame *frame, ICSetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    		script->setTSCount(script->getUseCount());
     	}
         return true;
     }
@@ -8528,7 +8519,7 @@ DoCallFallback(JSContext *cx, BaselineFrame *frame, ICCall_Fallback *stub_, uint
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
     return true;
 }
@@ -9781,7 +9772,7 @@ DoIteratorNewFallback(JSContext *cx, BaselineFrame *frame, ICIteratorNew_Fallbac
     res.set(value);
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
     return ValueToIterator(cx, flags, res);
 }
@@ -9840,8 +9831,7 @@ DoIteratorMoreFallback(JSContext *cx, BaselineFrame *frame, ICIteratorMore_Fallb
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	jsbytecode *pc = stub->icEntry()->pc(script);
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     return true;
@@ -9935,8 +9925,7 @@ DoIteratorNextFallback(JSContext *cx, BaselineFrame *frame, ICIteratorNext_Fallb
     }
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	jsbytecode *pc = stub->icEntry()->pc(script);
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
 
     return true;
@@ -10057,7 +10046,7 @@ DoInstanceOfFallback(JSContext *cx, ICInstanceOf_Fallback *stub,
     	jsbytecode *pc;
     	JSScript *script = cx->currentScript(&pc);
 
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
     res.setBoolean(cond);
     return true;
@@ -10113,7 +10102,7 @@ DoTypeOfFallback(JSContext *cx, BaselineFrame *frame, ICTypeOf_Fallback *stub, H
     	jsbytecode *pc;
     	JSScript *script = cx->currentScript(&pc);
 
-    	cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), script->getUseCount());
+    	script->setTSCount(script->getUseCount());
     }
     return true;
 }

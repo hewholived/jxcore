@@ -6925,11 +6925,8 @@ CodeGenerator::link(JSContext *cx, types::CompilerConstraintList *constraints)
             (void *) ionScript, (void *) code->raw());
 
     if (js_JitOptions.enableMonitor) {
-//      printf("IonCompile;%s;%d;%d;%d;%d;%p;%p\n",
-//              script->filename(), script->lineno(), script->column(),
-//              (int)script->getUseCount(), executionMode, (void *) ionScript, (void *) code->raw());
       cx->runtime()->jsmonitor->recordHotFunc(script->filename(),
-                                              (int) script->lineno(), (int) script->column());
+                                              (int) script->lineno(), (int) script->column(), script->getTSCount());
     }
     ionScript->setInvalidationEpilogueDataOffset(invalidateEpilogueData_.offset());
     ionScript->setOsrPc(gen->info().osrPc());

@@ -3701,8 +3701,7 @@ types::TypeMonitorResult(JSContext *cx, JSScript *script, jsbytecode *pc, const 
 
     if (jit::js_JitOptions.enableMonitor) {
     	if (!type.isPrimitive())
-    		cx->runtime()->jsmonitor->updateObjectTypeCount(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc),
-    		    							script->getUseCount());
+    		script->setTSCount(script->getUseCount());
     	else
     		cx->runtime()->jsmonitor->updateBytecodeType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), rval.isDouble() ? JSVAL_TYPE_DOUBLE : rval.extractNonDoubleType());
 
