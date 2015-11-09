@@ -1413,6 +1413,10 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     	// Call this only when the function is deoptimized.
     	tsCount = 0;
     }
+    void setUseCount(uint32_t value)
+    {
+    	useCount = value;
+    }
 
   public:
     bool initScriptCounts(JSContext *cx);

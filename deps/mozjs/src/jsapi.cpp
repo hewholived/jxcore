@@ -689,9 +689,17 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {
     	jit::js_JitOptions.enableOracle = true;
-    	const char* oracleFile = "/tmp/monitor.db";
-    	Oracle *oracle = new Oracle();
-    	oracle->init(oracleFile);
+    	long long id = 0;
+    	{
+    		std::ifstream in( "/tmp/enableOracle" );
+    		in >> id;
+    	}
+    	id++;
+    	{
+    		std::ofstream out( "/tmp/enableOracle" );
+    		out << id;
+    	}
+    	Oracle *oracle = new Oracle(id);
     	rt->SetOracle(oracle);
     }
 

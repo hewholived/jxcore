@@ -2355,6 +2355,14 @@ JSScript::Create(ExclusiveContext *cx, HandleObject enclosingScope, bool savedCa
     script->sourceStart_ = bufStart;
     script->sourceEnd_ = bufEnd;
 
+    if (jit::js_JitOptions.enableOracle) {
+    	int tsValue;
+    	cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column(), &tsValue);
+    	if (tsValue > 0 && tsValue < 1000) {
+    		script->setUseCount(1000 - tsValue);
+    	}
+    }
+
     return script;
 }
 
@@ -3069,6 +3077,14 @@ js::CloneScript(JSContext *cx, HandleObject enclosingScope, HandleFunction fun, 
         dst->trynotes()->vector = Rebase<JSTryNote>(dst, src, src->trynotes()->vector);
     if (nblockscopes != 0)
         dst->blockScopes()->vector = Rebase<BlockScopeNote>(dst, src, src->blockScopes()->vector);
+
+    if (jit::js_JitOptions.enableOracle) {
+    	int tsValue;
+    	cx->runtime()->oracle->getHotnessThreshold(dst->filename(), dst->lineno(), dst->column(), &tsValue);
+    	if (tsValue > 0 && tsValue < 1000) {
+    		dst->setUseCount(1000 - tsValue);
+    	}
+    }
 
     return dst;
 }

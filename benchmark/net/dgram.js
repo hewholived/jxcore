@@ -18,7 +18,7 @@ var bench = common.createBenchmark(main, {
   len: [1, 64, 256, 1024],
   num: [100],
   type: ['send', 'recv'],
-  dur: [30]
+  dur: [1]
 });
 var dur;
 var len;

@@ -163,6 +163,7 @@
        'src/jsinfer.cpp',
        'src/jsiter.cpp',
        'src/jsmonitor.cpp',
+       'src/jsoracle.cpp',
        'src/jsnativestack.cpp',
        'src/jsnum.cpp',
        'src/jsobj.cpp',

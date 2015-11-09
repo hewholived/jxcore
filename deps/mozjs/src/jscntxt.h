@@ -402,6 +402,7 @@ class ExclusiveContext : public ThreadSafeContext
     // Methods specific to any HelperThread for the context.
     frontend::CompileError &addPendingCompileError();
     void addPendingOverRecursed();
+    JSRuntime *runtime() const { return runtime_; }
 };
 
 } /* namespace js */
@@ -412,7 +413,6 @@ struct JSContext : public js::ExclusiveContext,
     explicit JSContext(JSRuntime *rt);
     ~JSContext();
 
-    JSRuntime *runtime() const { return runtime_; }
     js::PerThreadData &mainThread() const { return runtime()->mainThread; }
 
     static size_t offsetOfRuntime() {
