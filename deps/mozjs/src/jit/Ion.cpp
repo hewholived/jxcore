@@ -1921,7 +1921,7 @@ IonCompile(JSContext *cx, JSScript *script,
     if (!info)
         return AbortReason_Alloc;
 
-    BaselineInspector *inspector = alloc->new_<BaselineInspector>(script, cx->runtime());
+    BaselineInspector *inspector = alloc->new_<BaselineInspector>(script, cx);
     if (!inspector)
         return AbortReason_Alloc;
 
@@ -1943,7 +1943,7 @@ IonCompile(JSContext *cx, JSScript *script,
                                                   CompileCompartment::get(cx->compartment()),
                                                   options, temp, graph, constraints,
                                                   inspector, info, optimizationInfo,
-                                                  baselineFrameInspector, cx->runtime());
+                                                  baselineFrameInspector, cx);
     if (!builder)
         return AbortReason_Alloc;
 

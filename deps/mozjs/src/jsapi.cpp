@@ -18,6 +18,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <iostream>
+#include <fstream>
 
 #include "jsarray.h"
 #include "jsatom.h"
@@ -671,9 +673,18 @@ JS_NewRuntime(uint32_t maxbytes, uint32_t maxNurseryBytes, JSRuntime *parentRunt
     }
     //printf("Created a new runtime\n");
     if (file_exists("/tmp/enableMonitor")  || jit::js_JitOptions.enableMonitor) {
-    	//printf("Created a new runtime\n");
+    	long long id = 0;
+    	{
+    	   std::ifstream in( "/tmp/enableMonitor" );
+    	   in >> id;
+    	}
+    	id++;
+    	{
+    	   std::ofstream out( "/tmp/enableMonitor" );
+    	   out << id;
+    	}
     	jit::js_JitOptions.enableMonitor = true;
-    	JSMonitor* monitor = new JSMonitor();
+    	JSMonitor* monitor = new JSMonitor(id);
     	rt->SetJSMonitor(monitor);
     }
     if (file_exists("/tmp/enableOracle") || jit::js_JitOptions.enableOracle) {

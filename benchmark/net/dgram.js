@@ -6,13 +6,20 @@ var PORT = common.PORT;
 // `num` is the number of send requests to queue up each time.
 // Keep it reasonably high (>10) otherwise you're benchmarking the speed of
 // event loop cycles more than anything else.
+/*
+var bench = common.createBenchmark(main, {
+  len: [1024],
+  num: [100],
+  type: ['recv'],
+  dur: [5]
+});
+*/
 var bench = common.createBenchmark(main, {
   len: [1, 64, 256, 1024],
   num: [100],
   type: ['send', 'recv'],
-  dur: [5]
+  dur: [30]
 });
-
 var dur;
 var len;
 var num;

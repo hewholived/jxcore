@@ -111,7 +111,7 @@ IonBuilder::IonBuilder(JSContext *analysisContext, CompileCompartment *comp,
                        MIRGraph *graph, types::CompilerConstraintList *constraints,
                        BaselineInspector *inspector, CompileInfo *info,
                        const OptimizationInfo *optimizationInfo,
-                       BaselineFrameInspector *baselineFrame, JSRuntime *runtime, size_t inliningDepth,
+                       BaselineFrameInspector *baselineFrame, JSContext *context, size_t inliningDepth,
                        uint32_t loopDepth)
   : MIRGenerator(comp, options, temp, graph, info, optimizationInfo),
     backgroundCodegen_(nullptr),
@@ -141,7 +141,7 @@ IonBuilder::IonBuilder(JSContext *analysisContext, CompileCompartment *comp,
     nonStringIteration_(false),
     lazyArguments_(nullptr),
     inlineCallInfo_(nullptr),
-	runtime(runtime)
+	context(context)
 {
     script_ = info->script();
     pc = info->startPC();
@@ -567,9 +567,9 @@ IonBuilder::analyzeNewLoopTypes(MBasicBlock *entry, jsbytecode *start, jsbytecod
               case JSOP_MOD:
               case JSOP_NEG:
                 type = inspector->expectedResultType(last);
-                if (jit::js_JitOptions.enableMonitor && runtime != nullptr) {
+                if (jit::js_JitOptions.enableMonitor && context->runtime() != nullptr) {
                 	//printf("InspectorResultType;%s+%d+%d+%d;%d\n", script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
-                	runtime->jsmonitor->setInspectorResultType(script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
+                	context->runtime()->jsmonitor->setInspectorResultType(script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
                 }
               default:
                 break;
@@ -4001,7 +4001,7 @@ IonBuilder::inlineScriptedCall(CallInfo &callInfo, JSFunction *target)
     current->push(callInfo.fun());
 
     JSScript *calleeScript = target->nonLazyScript();
-    BaselineInspector inspector(calleeScript, runtime);
+    BaselineInspector inspector(calleeScript, context);
 
     // Improve type information of |this| when not set.
     if (callInfo.constructing() &&
@@ -4038,7 +4038,7 @@ IonBuilder::inlineScriptedCall(CallInfo &callInfo, JSFunction *target)
 
     // Build the graph.
     IonBuilder inlineBuilder(analysisContext, compartment, options, &alloc(), &graph(), constraints(),
-                             &inspector, info, &optimizationInfo(), nullptr, runtime, inliningDepth_ + 1,
+                             &inspector, info, &optimizationInfo(), nullptr, context, inliningDepth_ + 1,
                              loopDepth_);
     if (!inlineBuilder.buildInline(this, outerResumePoint, callInfo)) {
         if (analysisContext && analysisContext->isExceptionPending()) {
@@ -7365,10 +7365,10 @@ IonBuilder::getElemTryCache(bool *emitted, MDefinition *obj, MDefinition *index)
     // Turn off cacheing if the element is int32 and we've seen non-native objects as the target
     // of this getelem.
     bool nonNativeGetElement = inspector->hasSeenNonNativeGetElement(pc);
-    if (jit::js_JitOptions.enableMonitor && nonNativeGetElement && runtime != nullptr) {
+    if (jit::js_JitOptions.enableMonitor && nonNativeGetElement && context->runtime() != nullptr) {
 		JSScript *script = inspector->getScript();
 		//printf("InspectorNonNativeGetElem;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), nonNativeGetElement);
-		runtime->jsmonitor->setNonNativeGetElem(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), nonNativeGetElement);
+		context->runtime()->jsmonitor->setNonNativeGetElem(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), nonNativeGetElement);
 	}
 
     if (index->mightBeType(MIRType_Int32) && nonNativeGetElement)
@@ -10111,10 +10111,10 @@ IonBuilder::jsop_iternext()
         return false;
 
     bool retVal = inspector->hasSeenNonStringIterNext(pc);
-    if (jit::js_JitOptions.enableMonitor && retVal && runtime != nullptr) {
+    if (jit::js_JitOptions.enableMonitor && retVal && context->runtime() != nullptr) {
 		JSScript *script = inspector->getScript();
 		//printf("InspectorSeenNonString;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
-		runtime->jsmonitor->setSeenNonString(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
+		context->runtime()->jsmonitor->setSeenNonString(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 	}
 
     if (!nonStringIteration_ && !retVal) {

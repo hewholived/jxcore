@@ -1526,8 +1526,6 @@ HandleShapeGuardFailure(JSContext *cx, HandleScript outerScript, HandleScript in
     outerScript->setFailedShapeGuard();
     
     if (js_JitOptions.enableMonitor) {
-        JSOp op = JSOp(*pc);
-        //printf("ShapeGuardFailure;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(innerScript, pc), innerScript->filename(), innerScript->lineno(), innerScript->column(), innerScript->pcToOffset(pc), js_CodeName[op]);
         cx->runtime()->jsmonitor->recordShapeDeopt(innerScript->filename(), innerScript->lineno(), innerScript->column(), innerScript->pcToOffset(pc));
     }
 

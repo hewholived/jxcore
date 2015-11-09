@@ -2788,11 +2788,11 @@ jit::AnalyzeNewScriptProperties(JSContext *cx, JSFunction *fun,
         return false;
     }
 
-    BaselineInspector inspector(script, cx->runtime());
+    BaselineInspector inspector(script, cx);
     const JitCompileOptions options(cx);
 
     IonBuilder builder(cx, CompileCompartment::get(cx->compartment()), options, &temp, &graph, constraints,
-                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx->runtime());
+                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx);
 
     if (!builder.build()) {
         if (builder.abortReason() == AbortReason_Alloc)
@@ -3015,11 +3015,11 @@ jit::AnalyzeArgumentsUsage(JSContext *cx, JSScript *scriptArg)
     if (!constraints)
         return false;
 
-    BaselineInspector inspector(script, cx->runtime());
+    BaselineInspector inspector(script, cx);
     const JitCompileOptions options(cx);
 
     IonBuilder builder(nullptr, CompileCompartment::get(cx->compartment()), options, &temp, &graph, constraints,
-                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx->runtime());
+                       &inspector, &info, optimizationInfo, /* baselineFrame = */ nullptr, cx);
 
     if (!builder.build()) {
         if (builder.abortReason() == AbortReason_Alloc)

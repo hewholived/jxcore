@@ -994,11 +994,6 @@ DoUseCountFallback(JSContext *cx, ICUseCount_Fallback *stub, BaselineFrame *fram
     if (!info)
         return false;
 
-//    if(js_JitOptions.enableMonitor)
-//        printf("IonCompile;%s;%d;%d;%d\n", script->filename(), script->lineno(),
-//                                           script->column(),
-//                                           (int) script->getUseCount());
-
     *infoPtr = info;
 
     return true;
@@ -4062,14 +4057,6 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
         if (!GetElementOperation(cx, op, &lhsCopy, rhs, res))
             return false;
         types::TypeScript::Monitor(cx, frame->script(), pc, res);
-        if (js_JitOptions.enableMonitor) {
-            JSOp op = JSOp(*pc);
-            JSValueType type = res.isDouble() ? JSVAL_TYPE_DOUBLE : res.extractNonDoubleType();
-            //printf("MonitorBytecode;%s+%d+%d+%d+%s;%d\n", frame->script()->filename(), frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc), js_CodeName[op], type);
-            cx->runtime()->jsmonitor->updateBytecodeType(frame->script()->filename(),
-                            		frame->script()->lineno(), script->column(), frame->script()->pcToOffset(pc),
-            						(int)type);
-         }
     }
 
     // Check if debug mode toggling made the stub invalid.
@@ -6567,9 +6554,6 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     jsbytecode *pc = stub->icEntry()->pc(frame->script());
     JSOp op = JSOp(*pc);
     FallbackICSpew(cx, stub, "GetProp(%s)", js_CodeName[op]);
-    if (js_JitOptions.enableMonitor) {
-        //printf("GetpropFallback;%s;%d;%d;%d\n", frame->script()->filename(), frame->script()->lineno(), frame->script()->column(), frame->script()->pcToOffset(pc));
-    }
 
     JS_ASSERT(op == JSOP_GETPROP || op == JSOP_CALLPROP || op == JSOP_LENGTH || op == JSOP_GETXPROP);
 
@@ -6592,10 +6576,6 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         return true;
     }
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
-    }
 
     bool attached = false;
 
@@ -10045,7 +10025,6 @@ DoInstanceOfFallback(JSContext *cx, ICInstanceOf_Fallback *stub,
     if (jit::js_JitOptions.enableMonitor) {
     	jsbytecode *pc;
     	JSScript *script = cx->currentScript(&pc);
-
     	script->setTSCount(script->getUseCount());
     }
     res.setBoolean(cond);
