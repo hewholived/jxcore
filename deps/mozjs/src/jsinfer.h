@@ -221,9 +221,10 @@ struct TypeObjectKey;
 class Type
 {
     uintptr_t data;
-    explicit Type(uintptr_t data) : data(data) {}
+
 
   public:
+    explicit Type(uintptr_t data) : data(data) {}
 
     uintptr_t raw() const { return data; }
 
@@ -1259,6 +1260,8 @@ class TypeScript
      */
     static inline void Monitor(JSContext *cx, JSScript *script, jsbytecode *pc,
                                const js::Value &val);
+    static inline void Monitor(JSContext *cx, JSScript *script, jsbytecode *pc,
+    		 js::types::Type type);
     static inline void Monitor(JSContext *cx, const js::Value &rval);
 
     /* Monitor an assignment at a SETELEM on a non-integer identifier. */

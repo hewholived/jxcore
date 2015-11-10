@@ -1,4 +1,7 @@
 #include "jsoracle.h"
+#include "jsinfer.h"
+#include "jsinferinlines.h"
+
 
 js::Oracle::Oracle(int id)
 {
@@ -62,5 +65,41 @@ js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, 
 	}
 
 	return 0;
+}
+
+static int
+typesCallback(void *passPtr, int argc, char **argv, char **azColName)
+{
+	unsigned long int *data = (unsigned long int *) passPtr;
+	JSContext *context = (JSContext *)data[0];
+	JSScript *script = (JSScript *)data[1];
+
+	if (argc != 2)
+		return -1;
+
+	js::types::TypeScript::Monitor(context, script, script->offsetToPC(atoi(argv[0])), (js::types::Type)atoi(argv[1]));
+	//printf("Updating types %s:%d:%d:%d:%d\n", script->filename(), script->lineno(), script->column(), atoi(argv[0]), atoi(argv[1]));
+
+	return 0;
+}
+
+void
+js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
+{
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	unsigned long int *data = (unsigned long int *)malloc(2);
+	data[0] = (unsigned long int)context;
+	data[1] = (unsigned long int)script;
+
+	sprintf(buff,"SELECT PCOFFSET,TYPE FROM TYPES WHERE NAME='%s:%d:%d'", script->filename(), script->lineno(), script->column());
+	rc = sqlite3_exec(db, buff, typesCallback, (void *)data, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return;
+	}
+
 }
 

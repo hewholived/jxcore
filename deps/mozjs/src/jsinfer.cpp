@@ -3713,6 +3713,27 @@ types::TypeMonitorResult(JSContext *cx, JSScript *script, jsbytecode *pc, const 
     types->addType(cx, type);
 }
 
+void
+types::TypeDynamicResult(JSContext *cx, JSScript *script, jsbytecode *pc, js::types::Type type)
+{
+    /* Allow the non-TYPESET scenario to simplify stubs used in compound opcodes. */
+    if (!(js_CodeSpec[*pc].format & JOF_TYPESET))
+        return;
+
+    if (!script->hasBaselineScript())
+        return;
+
+    AutoEnterAnalysis enter(cx);
+
+    StackTypeSet *types = TypeScript::BytecodeTypes(script, pc);
+    if (types->hasType(type))
+        return;
+
+    InferSpew(ISpewOps, "bytecodeType: #%u:%05u: %s",
+              script->id(), script->pcToOffset(pc), TypeString(type));
+    types->addType(cx, type);
+}
+
 bool
 types::UseNewTypeForClone(JSFunction *fun)
 {

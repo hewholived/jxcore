@@ -749,6 +749,12 @@ TypeScript::Monitor(JSContext *cx, JSScript *script, jsbytecode *pc, const js::V
     TypeMonitorResult(cx, script, pc, rval);
 }
 
+inline void
+TypeScript::Monitor(JSContext *cx, JSScript *script, jsbytecode *pc, js::types::Type type)
+{
+    TypeDynamicResult(cx, script, pc, type);
+}
+
 /* static */ inline void
 TypeScript::Monitor(JSContext *cx, const js::Value &rval)
 {

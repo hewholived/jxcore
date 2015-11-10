@@ -87,8 +87,9 @@ js::JSMonitor::Init(int threadID)
 
 	sql = "CREATE TABLE TYPES("  \
 			"NAME           CHAR(100)    NOT NULL," \
+			"PCOFFSET		INT			NOT NULL,"
 			"TYPE           INT         NOT NULL," \
-			"UNIQUE (NAME, TYPE));";
+			"UNIQUE (NAME, PCOFFSET, TYPE));";
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
@@ -98,7 +99,7 @@ js::JSMonitor::Init(int threadID)
 
 	sql = "CREATE TABLE SHAPESDEOPT("  \
 			"NAME           CHAR(100)    NOT NULL," \
-			"PCOFFSET		INT			NOT NULL,"
+			"PCOFFSET		INT			NOT NULL," \
 			"UNIQUE(NAME, PCOFFSET));";
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
@@ -120,8 +121,9 @@ js::JSMonitor::Init(int threadID)
 
 	sql = "CREATE TABLE INSPECTORTYPES("  \
 			"NAME           CHAR(100)    NOT NULL," \
+			"PCOFFSET		INT			NOT NULL," \
 			"TYPE           INT         NOT NULL," \
-			"UNIQUE (NAME, TYPE));";
+			"UNIQUE (NAME, PCOFFSET, TYPE));";
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
@@ -159,7 +161,7 @@ js::JSMonitor::updateBytecodeType(const char* fileName, long unsigned int lineNo
 	if (monitorDb == nullptr)
 		return;
 
-	sprintf(buff,"INSERT INTO TYPES (NAME, TYPE) VALUES ('%s:%d:%d:%d', %d)", fileName, lineNo, column, pc, type);
+	sprintf(buff,"INSERT INTO TYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d)", fileName, lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
@@ -241,7 +243,7 @@ js::JSMonitor::setInspectorResultType(const char* fileName, long unsigned int li
 
 	if (monitorDb == nullptr)
 		return;
-	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, TYPE) VALUES ('%s:%d:%d:%d', %d)", fileName, lineNo, column, pc, type);
+	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d)", fileName, lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);

@@ -15,7 +15,7 @@ var common = require('../common.js');
 var bench = common.createBenchmark(main, {
   len: [1024 * 1024 * 16],
   type: ['buf'],
-  dur: [5]
+  dur: [1]
 });
 
 var TCP = process.binding('tcp_wrap').TCP;

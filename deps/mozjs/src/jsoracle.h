@@ -10,6 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//#include "jscntxt.h"
+#include "jsscript.h"
+//#include "jsinfer.h"
+//#include "jstypes.h"
+
+
 #ifndef SHELL_ORACLE_H_
 #define SHELL_ORACLE_H_
 
@@ -23,6 +29,7 @@ public:
 	~Oracle();
 	void Init(int id);
 	int getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column, int *value);
+	void getTypeInfos(JSContext *context, JSScript *script);
 };
 }
 
