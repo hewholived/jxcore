@@ -534,7 +534,6 @@ void JXEngine::InitializeEngine(int argc, char **argv) {
 
   JSContext *ctx = main_iso_.GetRaw();
   JSRuntime *rt = JS_GetRuntime(ctx);
-  //printf("%s\n", entry_file_name_.c_str());
 
   do {
     Init(argc, argv_copy, was_inited);
@@ -946,6 +945,7 @@ void JXEngine::Destroy() {
   jx_engine_map::iterator it = jx_engine_instances.find(main_node_->threadId);
   if (it != jx_engine_instances.end()) jx_engine_instances.erase(it);
   customUnlock(CSLOCK_JOBS);
+
 }
 #endif
 

@@ -146,6 +146,9 @@ IonBuilder::IonBuilder(JSContext *analysisContext, CompileCompartment *comp,
     script_ = info->script();
     pc = info->startPC();
     abortReason_ = AbortReason_Disable;
+    //printf("Created an IonBuilder %s:%d:%d(%d, %d)\n", script_->filename(), script_->lineno(), script_->column(), script_->getTSCount(), script_->getUseCount());
+    if (js_JitOptions.enableMonitor && script_->getUseCount() > 50)
+        context->runtime()->jsmonitor->recordHotFunc(script_->filename(), script_->lineno(), script_->column(), script_->getTSCount());
 
     JS_ASSERT(script()->hasBaselineScript() == (info->executionMode() != ArgumentsUsageAnalysis));
     JS_ASSERT(!!analysisContext == (info->executionMode() == DefinitePropertiesAnalysis));

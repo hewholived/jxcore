@@ -6,11 +6,18 @@ var common = require('../common.js');
 // if there are dur=N and len=N args, then
 // run the function with those settings.
 // if not, then queue up a bunch of child processes.
-var bench = common.createBenchmark(main, {
+/*var bench = common.createBenchmark(main, {
   len: [102400, 1024 * 1024 * 16],
   type: ['utf', 'asc', 'buf'],
   dur: [600]
 });
+*/
+var bench = common.createBenchmark(main, {
+  len: [1024 * 1024 * 16],
+  type: ['asc'],
+  dur: [30]
+});
+
 
 var TCP = process.binding('tcp_wrap').TCP;
 var PORT = common.PORT;

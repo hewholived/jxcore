@@ -1809,6 +1809,12 @@ AttachFinishedCompilations(JSContext *cx)
                 cx->clearPendingException();
             }
         }
+        if (js_JitOptions.enableMonitor) {
+        	printf("Logging the information\n");
+        	RootedScript script(cx, builder->script());
+        	cx->runtime()->jsmonitor->recordHotFunc(script->filename(),
+        			(int) script->lineno(), (int) script->column(), script->getTSCount());
+        }
 
         FinishOffThreadBuilder(builder);
     }
