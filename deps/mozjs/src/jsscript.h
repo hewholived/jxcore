@@ -1026,7 +1026,9 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
         return column_;
     }
 
-    void setColumn(size_t column) { column_ = column; }
+    void setColumn(size_t column) {
+    	column_ = column;
+    }
 
     // The fixed part of a stack frame is comprised of vars (in function code)
     // and block-scoped locals (in all kinds of code).

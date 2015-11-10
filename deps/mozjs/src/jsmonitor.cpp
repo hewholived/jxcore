@@ -161,7 +161,7 @@ js::JSMonitor::updateBytecodeType(const char* fileName, long unsigned int lineNo
 	if (monitorDb == nullptr)
 		return;
 
-	sprintf(buff,"INSERT INTO TYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d)", fileName, lineNo, column, pc, type);
+	sprintf(buff,"INSERT INTO TYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d);", fileName, lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
@@ -181,7 +181,7 @@ js::JSMonitor::recordShapeDeopt(const char* fileName, long unsigned int lineNo, 
 	if (monitorDb == nullptr)
 		return;
 
-	sprintf(buff,"INSERT INTO SHAPESDEOPT (NAME, PCOFFSET) VALUES ('%s:%d:%d', %d)", fileName, lineNo, column, pc);
+	sprintf(buff,"INSERT INTO SHAPESDEOPT (NAME, PCOFFSET) VALUES ('%s:%d:%d', %d);", fileName, lineNo, column, pc);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: SHAPESDEOPT %s\n", zErrMsg);
@@ -202,7 +202,7 @@ js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, lon
 		return;
 
 	//printf("Recording hot function\n");
-	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, TSCOUNT) VALUES ('%s:%d:%d', %d)", fileName, lineNo, column, tsCount);
+	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, TSCOUNT) VALUES ('%s:%d:%d', %d);", fileName, lineNo, column, tsCount);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
@@ -224,7 +224,7 @@ js::JSMonitor::updateObjectTypeCount(const char* fileName, long unsigned int lin
 		return;
 
 	sprintf(buff,"INSERT OR REPLACE INTO OBJECTTYPES (NAME, LINENO, COLUMNNO, INVOCCOUNT) VALUES ('%s', %d, %d, "\
-			"COALESCE((SELECT INVOCCOUNT FROM OBJECTTYPES WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d AND INVOCCOUNT>%d), %d))",
+			"COALESCE((SELECT INVOCCOUNT FROM OBJECTTYPES WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d AND INVOCCOUNT>%d), %d));",
 			fileName, lineNo, column, fileName, lineNo, column, invocCount, invocCount);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
@@ -243,7 +243,7 @@ js::JSMonitor::setInspectorResultType(const char* fileName, long unsigned int li
 
 	if (monitorDb == nullptr)
 		return;
-	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d)", fileName, lineNo, column, pc, type);
+	sprintf(buff,"INSERT INTO INSPECTORTYPES (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d);", fileName, lineNo, column, pc, type);
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);

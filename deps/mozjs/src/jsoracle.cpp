@@ -41,10 +41,13 @@ hotFunCallback(void *passPtr, int argc, char **argv, char **azColName)
 {
 	int *retval = (int *) passPtr;
 
-	if (argc == 0 || argc > 1)
+	//printf("in callback %p:", retval);
+	if (argc == 0 || argc > 1) {
 		*retval = -1;
-	else
+	} else {
 		*retval = argv[0] ? -1 : atoi(argv[0]);
+		printf("%d\n", atoi(argv[0]));
+	}
 
 	return 0;
 }
@@ -56,10 +59,11 @@ js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, 
 	char *zErrMsg = 0;
 	char buff[500];
 
-	sprintf(buff,"SELECT TSCOUNT FROM HOTFUNCS WHERE NAME='%s:%d:%d", fileName, lineNo, column);
+	sprintf(buff,"SELECT TSCOUNT FROM HOTFUNCS WHERE NAME='%s:%d:%d';", fileName, lineNo, column);
+	//printf("Query:%s\n", buff);
 	rc = sqlite3_exec(db, buff, hotFunCallback, (void *)value, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		//fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return -1;
 	}
@@ -93,7 +97,7 @@ js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
 	data[0] = (unsigned long int)context;
 	data[1] = (unsigned long int)script;
 
-	sprintf(buff,"SELECT PCOFFSET,TYPE FROM TYPES WHERE NAME='%s:%d:%d'", script->filename(), script->lineno(), script->column());
+	sprintf(buff,"SELECT PCOFFSET,TYPE FROM TYPES WHERE NAME='%s:%d:%d';", script->filename(), script->lineno(), script->column());
 	rc = sqlite3_exec(db, buff, typesCallback, (void *)data, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);

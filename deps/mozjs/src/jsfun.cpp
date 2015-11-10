@@ -1493,6 +1493,17 @@ JSFunction::createScriptForLazilyInterpretedFunction(JSContext *cx, HandleFuncti
             // Only functions without inner functions are re-lazified.
             script->setLazyScript(lazy);
         }
+
+
+        if (jit::js_JitOptions.enableOracle) {
+        	int *tsValue = (int *)malloc(1);
+        	*tsValue = -1;
+        	cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column(), tsValue);
+        	if (*tsValue >= 0 && *tsValue < 1000) {
+        		script->setUseCount(1000 - *tsValue);
+        		printf("Setting the usecount to %d\n", 1000 - *tsValue);
+        	}
+        }
         return true;
     }
 
