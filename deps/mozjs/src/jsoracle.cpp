@@ -19,9 +19,6 @@ js::Oracle::Oracle(int id)
 void
 js::Oracle::Init(int id)
 {
-	char *sql;
-	int rc = 0;
-	char *zErrMsg = 0;
 	char filename[100];
 
 	sprintf(filename, "monitor%d.db", id);
@@ -56,7 +53,7 @@ js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, 
 	char *zErrMsg = 0;
 	char buff[500];
 
-	sprintf(buff,"SELECT TSCOUNT FROM HOTFUNCS WHERE NAME='%s' AND LINENO=%d AND COLUMNNO=%d", fileName, lineNo, column);
+	sprintf(buff,"SELECT TSCOUNT FROM HOTFUNCS WHERE NAME='%s:%d:%d", fileName, lineNo, column);
 	rc = sqlite3_exec(db, buff, hotFunCallback, (void *)value, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		//fprintf(stderr, "SQL error: types %s\n", zErrMsg);

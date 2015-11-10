@@ -3,11 +3,18 @@
 var common = require('../common.js');
 var http = require('http');
 
-var bench = common.createBenchmark(main, {
+/*var bench = common.createBenchmark(main, {
   dur: [5],
   type: ['asc', 'utf', 'buf'],
   bytes: [32, 256, 1024],
   method: ['write', 'end  '] // two spaces added to line up each row
+});
+*/
+var bench = common.createBenchmark(main, {
+  dur: [15],
+  type: ['buf'],
+  bytes: [1024],
+  method: ['write'] // two spaces added to line up each row
 });
 
 function main(conf) {

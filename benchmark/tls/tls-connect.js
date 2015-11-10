@@ -5,10 +5,15 @@ var assert = require('assert'),
 
 var common = require('../common.js');
 var bench = common.createBenchmark(main, {
+  concurrency: [10],
+  dur: [15]
+});
+
+/*var bench = common.createBenchmark(main, {
   concurrency: [1, 10],
   dur: [5]
 });
-
+*/
 var clientConn = 0;
 var serverConn = 0;
 var server;

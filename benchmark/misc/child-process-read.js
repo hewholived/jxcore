@@ -1,7 +1,12 @@
 var common = require('../common.js');
-var bench = common.createBenchmark(main, {
+/*var bench = common.createBenchmark(main, {
   len: [64, 256, 1024, 4096, 32768],
   dur: [5]
+});
+*/
+var bench = common.createBenchmark(main, {
+  len: [32768],
+  dur: [15]
 });
 
 var spawn = require('child_process').spawn;

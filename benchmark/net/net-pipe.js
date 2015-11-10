@@ -3,9 +3,15 @@
 var common = require('../common.js');
 var PORT = common.PORT;
 
-var bench = common.createBenchmark(main, {
+/*var bench = common.createBenchmark(main, {
   len: [102400, 1024 * 1024 * 16],
   type: ['utf', 'asc', 'buf'],
+  dur: [5],
+});
+*/
+var bench = common.createBenchmark(main, {
+  len: [1024 * 1024 * 16],
+  type: ['buf'],
   dur: [5],
 });
 

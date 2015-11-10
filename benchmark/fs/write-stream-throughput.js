@@ -5,10 +5,16 @@ var common = require('../common.js');
 var filename = path.resolve(__dirname, '.removeme-benchmark-garbage');
 var fs = require('fs');
 
-var bench = common.createBenchmark(main, {
+/*var bench = common.createBenchmark(main, {
   dur: [5],
   type: ['buf', 'asc', 'utf'],
   size: [2, 1024, 65535, 1024 * 1024]
+});
+*/
+var bench = common.createBenchmark(main, {
+  dur: [15],
+  type: ['asc'],
+  size: [1024 * 1024]
 });
 
 function main(conf) {

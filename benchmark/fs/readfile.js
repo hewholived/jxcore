@@ -8,11 +8,17 @@ var filename = path.resolve(__dirname, '.removeme-benchmark-garbage');
 var fs = require('fs');
 
 var bench = common.createBenchmark(main, {
+  dur: [15],
+  len: [16 * 1024 * 1024],
+  concurrent: [10]
+});
+
+/*var bench = common.createBenchmark(main, {
   dur: [5],
   len: [1024, 16 * 1024 * 1024],
   concurrent: [1, 10]
 });
-
+*/
 function main(conf) {
   var len = +conf.len;
   try { fs.unlinkSync(filename); } catch (e) {}
