@@ -1496,12 +1496,13 @@ JSFunction::createScriptForLazilyInterpretedFunction(JSContext *cx, HandleFuncti
 
 
         if (jit::js_JitOptions.enableOracle) {
-        	int *tsValue = (int *)malloc(1);
-        	*tsValue = -1;
-        	cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column(), tsValue);
-        	if (*tsValue >= 0 && *tsValue < 1000) {
-        		script->setUseCount(1000 - *tsValue);
-        		printf("Setting the usecount to %d\n", 1000 - *tsValue);
+        	int tsValue = script->getTSCount();
+        	if (tsValue == 1000)
+        		tsValue = cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column());
+        	if (tsValue >= 0 && tsValue < 900) {
+        		script->setUseCount(1000 - tsValue - 100);
+        		script->setTSCount(tsValue);
+        		//printf("Setting the usecount to %d\n", 1000 - tsValue);
         	}
         }
         return true;

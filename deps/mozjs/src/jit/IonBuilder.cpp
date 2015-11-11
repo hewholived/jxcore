@@ -150,8 +150,11 @@ IonBuilder::IonBuilder(JSContext *analysisContext, CompileCompartment *comp,
     if (js_JitOptions.enableMonitor && script_->getUseCount() > 50)
         context->runtime()->jsmonitor->recordHotFunc(script_->filename(), script_->lineno(), script_->column(), script_->getTSCount());
 
-    if (js_JitOptions.enableOracle) {
-    	context->runtime()->oracle->getTypeInfos(context, script_);
+    if (js_JitOptions.enableOracle && !script_->isOracled()) {
+    	if (context->runtime()->oracle->getHotnessThreshold(script_->filename(), script_->lineno(), script_->column()) != -1) {
+    		context->runtime()->oracle->getTypeInfos(context, script_);
+    	}
+    	script_->setOracled();
     }
 
     JS_ASSERT(script()->hasBaselineScript() == (info->executionMode() != ArgumentsUsageAnalysis));

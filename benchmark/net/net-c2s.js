@@ -11,7 +11,7 @@ var PORT = common.PORT;
 var bench = common.createBenchmark(main, {
   len: [1024 * 1024 * 16],
   type: ['utf'],
-  dur: [1],
+  dur: [0.25],
 });
 
 

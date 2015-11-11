@@ -28,7 +28,7 @@ public:
 	Oracle(int id);
 	~Oracle();
 	void Init(int id);
-	int getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column, int *value);
+	int getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column);
 	void getTypeInfos(JSContext *context, JSScript *script);
 };
 }

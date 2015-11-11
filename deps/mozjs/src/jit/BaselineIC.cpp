@@ -1679,6 +1679,13 @@ DoCallNativeGetter(JSContext *cx, HandleFunction callee, HandleObject obj,
         return false;
 
     result.set(vp[0]);
+
+    if (jit::js_JitOptions.enableMonitor) {
+    	jsbytecode *pc;
+    	JSScript *script = cx->currentScript(&pc);
+    	script->setTSCount(script->getUseCount());
+    }
+
     return true;
 }
 
@@ -1695,16 +1702,18 @@ DoThisFallback(JSContext *cx, ICThis_Fallback *stub, HandleValue thisv, MutableH
 {
     FallbackICSpew(cx, stub, "This");
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-    	script->setTSCount(script->getUseCount());
-    }
+
     JSObject *thisObj = BoxNonStrictThis(cx, thisv);
     if (!thisObj)
         return false;
 
     ret.setObject(*thisObj);
+
+    if (jit::js_JitOptions.enableMonitor) {
+    	jsbytecode *pc;
+    	JSScript *script = cx->currentScript(&pc);
+    	script->setTSCount(script->getUseCount());
+    }
     return true;
 }
 
@@ -8027,6 +8036,11 @@ DoCallNativeSetter(JSContext *cx, HandleFunction callee, HandleObject obj, Handl
     vp[1].setObject(*obj.get());
     vp[2].set(val);
 
+    if (jit::js_JitOptions.enableMonitor) {
+    	jsbytecode *pc;
+    	JSScript *script = cx->currentScript(&pc);
+    	script->setTSCount(script->getUseCount());
+    }
     return natfun(cx, 1, vp.begin());
 }
 

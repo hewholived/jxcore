@@ -43,21 +43,23 @@ hotFunCallback(void *passPtr, int argc, char **argv, char **azColName)
 
 	//printf("in callback %p:", retval);
 	if (argc == 0 || argc > 1) {
-		*retval = -1;
+		retval[0] = -1;
 	} else {
-		*retval = argv[0] ? -1 : atoi(argv[0]);
-		printf("%d\n", atoi(argv[0]));
+		retval[0] = argv[0] ? atoi(argv[0]) : -1;
+		//printf("%d\n", atoi(argv[0]));
 	}
 
 	return 0;
 }
 
 int
-js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column, int *value)
+js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column)
 {
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
+	int* value = (int *)malloc(1);
+	value[0] = -1;
 
 	sprintf(buff,"SELECT TSCOUNT FROM HOTFUNCS WHERE NAME='%s:%d:%d';", fileName, lineNo, column);
 	//printf("Query:%s\n", buff);
@@ -68,7 +70,7 @@ js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, 
 		return -1;
 	}
 
-	return 0;
+	return value[0];
 }
 
 static int

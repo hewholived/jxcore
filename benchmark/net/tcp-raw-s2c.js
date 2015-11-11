@@ -15,7 +15,7 @@ var common = require('../common.js');
 var bench = common.createBenchmark(main, {
   len: [1024 * 1024 * 16],
   type: ['asc'],
-  dur: [1]
+  dur: [0.25]
 });
 
 

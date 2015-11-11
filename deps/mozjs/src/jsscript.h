@@ -825,6 +825,7 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
                                  * Reset if the script's JIT code is forcibly
                                  * discarded. */
     uint32_t		tsCount;
+    bool			oracled_;
 
 #ifdef DEBUG
     // Unique identifier within the compartment for this script, used for
@@ -1409,7 +1410,10 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     uint32_t *addressOfUseCount() { return &useCount; }
     static size_t offsetOfUseCount() { return offsetof(JSScript, useCount); }
     void resetUseCount() {
-    	useCount = 0;
+    	if (tsCount != 1000)
+    		useCount = 1000 - tsCount - 10;
+    	else
+    		useCount = 0;
     }
     void resetTSCount() {
     	// Call this only when the function is deoptimized.
@@ -1418,6 +1422,18 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     void setUseCount(uint32_t value)
     {
     	useCount = value;
+    }
+    bool isOracled()
+    {
+    	return oracled_;
+    }
+    void setOracled()
+    {
+    	oracled_ = true;
+    }
+    void clearOracled()
+    {
+    	oracled_ = false;
     }
 
   public:
