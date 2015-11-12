@@ -15,6 +15,7 @@ js::Oracle::Oracle(int id)
 		sqlite3_free(zErrMsg);
 	}
 
+	db = nullptr;
 	index = id;
 	Init(id);
 }
@@ -26,7 +27,7 @@ js::Oracle::Init(int id)
 
 	sprintf(filename, "monitor%d.db", id);
 
-	if (sqlite3_open(filename, &db) != 0) {
+	if (sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, nullptr) != 0) {
 		printf("Monitor: Db init error.\n");
 		return;
 	}
@@ -55,6 +56,9 @@ hotFunCallback(void *passPtr, int argc, char **argv, char **azColName)
 int
 js::Oracle::getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column)
 {
+	if (db == nullptr)
+		return -1;
+
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
@@ -92,6 +96,9 @@ typesCallback(void *passPtr, int argc, char **argv, char **azColName)
 void
 js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
 {
+	if (db == nullptr)
+		return;
+
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
@@ -123,6 +130,9 @@ inspectorBoolCallback(void *passPtr, int argc, char **argv, char **azColName)
 bool
 js::Oracle::inspectorBoolData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc)
 {
+	if (db == nullptr)
+		return false;
+
 	bool *retVal = (bool*)malloc(1);
 	*retVal = false;
 	int rc = 0;
@@ -187,6 +197,9 @@ inspectorTypeCallback(void *passPtr, int argc, char **argv, char **azColName)
 js::jit::MIRType
 js::Oracle::inspectorTypeData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, js::jit::MIRType curType)
 {
+	if (db == nullptr)
+		return curType;
+
 	js::jit::MIRType *retVal = (js::jit::MIRType *) malloc(1);
 	*retVal = curType;
 
