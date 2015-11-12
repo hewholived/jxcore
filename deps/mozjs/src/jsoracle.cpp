@@ -29,6 +29,7 @@ js::Oracle::Init(int id)
 
 	if (sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, nullptr) != 0) {
 		printf("Monitor: Db init error.\n");
+		db = nullptr;
 		return;
 	}
 }
