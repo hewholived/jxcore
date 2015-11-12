@@ -109,3 +109,99 @@ js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
 
 }
 
+static int
+inspectorBoolCallback(void *passPtr, int argc, char **argv, char **azColName)
+{
+	bool *retVal = (bool *) passPtr;
+
+	if (argv[0])
+		*retVal = (*retVal) || (bool)atoi(argv[0]);
+
+	return 0;
+}
+
+bool
+js::Oracle::inspectorBoolData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc)
+{
+	bool *retVal = (bool*)malloc(1);
+	*retVal = false;
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+
+
+	sprintf(buff,"SELECT TYPE FROM INSPECTORTYPES WHERE NAME='%s:%d:%d' AND PCOFFSET=%d;", fileName, lineNo, column, pc);
+	//printf("Query:%s\n", buff);
+	rc = sqlite3_exec(db, buff, inspectorBoolCallback, (void *)retVal, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return false;
+	}
+
+	return *retVal;
+}
+
+static js::jit::MIRType
+moveUpTheLattice(js::jit::MIRType type1, js::jit::MIRType type2)
+{
+	if (type1 == js::jit::MIRType_None || type2 == js::jit::MIRType_None)
+		return js::jit::MIRType_None;
+
+	if (type1 == js::jit::MIRType_Int32) {
+		if (type2 == js::jit::MIRType_Int32)
+			return js::jit::MIRType_Int32;
+		else if (type2 == js::jit::MIRType_Double)
+			return js::jit::MIRType_Double;
+		else
+			return js::jit::MIRType_None;
+	}
+	if (type1 == js::jit::MIRType_Double) {
+		if (type2 == js::jit::MIRType_Int32)
+			return js::jit::MIRType_Double;
+		else if (type2 == js::jit::MIRType_Double)
+			return js::jit::MIRType_Double;
+		else
+			return js::jit::MIRType_None;
+	}
+	if (type1 == js::jit::MIRType_String) {
+		if (type2 == js::jit::MIRType_String)
+			return js::jit::MIRType_String;
+		else
+			return js::jit::MIRType_None;
+	}
+	return js::jit::MIRType_None;
+}
+
+static int
+inspectorTypeCallback(void *passPtr, int argc, char **argv, char **azColName)
+{
+	js::jit::MIRType *retVal = (js::jit::MIRType *) passPtr;
+
+	if (argv[0])
+		*retVal = moveUpTheLattice(*retVal, (js::jit::MIRType)atoi(argv[0]));
+
+	return 0;
+}
+
+js::jit::MIRType
+js::Oracle::inspectorTypeData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, js::jit::MIRType curType)
+{
+	js::jit::MIRType *retVal = (js::jit::MIRType *) malloc(1);
+	*retVal = curType;
+
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+
+	sprintf(buff,"SELECT TYPE FROM INSPECTORTYPES WHERE NAME='%s:%d:%d' AND PCOFFSET=%d;", fileName, lineNo, column, pc);
+	//printf("Query:%s\n", buff);
+	rc = sqlite3_exec(db, buff, inspectorTypeCallback, (void *)retVal, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return curType;
+	}
+
+	return *retVal;
+}

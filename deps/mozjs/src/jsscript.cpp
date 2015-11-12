@@ -2354,8 +2354,10 @@ JSScript::Create(ExclusiveContext *cx, HandleObject enclosingScope, bool savedCa
     script->setSourceObject(sourceObject);
     script->sourceStart_ = bufStart;
     script->sourceEnd_ = bufEnd;
-    script->clearOracled();
-    script->setTSCount(1000);
+    if (jit::js_JitOptions.enableOracle) {
+    	script->clearOracled();
+    	script->setTSCount(1000);
+    }
 
     return script;
 }
@@ -3078,9 +3080,9 @@ js::CloneScript(JSContext *cx, HandleObject enclosingScope, HandleFunction fun, 
     	if (tsValue > 0 && tsValue < 900) {
     		dst->setUseCount(1000 - tsValue - 10);
     	}
+    	dst->clearOracled();
+    	dst->setTSCount(1000);
     }
-    dst->clearOracled();
-    dst->setTSCount(1000);
 
     return dst;
 }

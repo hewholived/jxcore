@@ -33,6 +33,7 @@ namespace js {
 	  void setSeenDouble(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
 	  void setBinaryType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
 	  void setSeenAccessedGetter(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, bool value);
+	  void recordBailout(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int bailoutkind);
 	  sqlite3 *getMonitorDb();
 	  void Init(int index);
 

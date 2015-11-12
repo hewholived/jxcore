@@ -1933,6 +1933,11 @@ MBinaryArithInstruction::infer(TempAllocator &alloc, BaselineInspector *inspecto
 		//printf("InspectorSeenDouble;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 		inspector->getRuntime()->jsmonitor->setSeenDouble(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 	}
+    if (jit::js_JitOptions.enableOracle) {
+    	JSScript *script = inspector->getScript();
+    	retVal = retVal || inspector->getRuntime()->oracle->inspectorBoolData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc));
+    }
+
     if (inspector->hasSeenDoubleResult(pc)) {
         setResultType(MIRType_Double);
     }
@@ -1979,10 +1984,14 @@ MBinaryArithInstruction::inferFallback(BaselineInspector *inspector,
 {
     // Try to specialize based on what baseline observed in practice.
     specialization_ = inspector->expectedBinaryArithSpecialization(pc);
-    if (jit::js_JitOptions.enableMonitor && specialization_ != MIRType_None) {
+    if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = inspector->getScript();
     	//printf("InspectorBinaryType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
     	inspector->getRuntime()->jsmonitor->setBinaryType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
+    }
+    if (jit::js_JitOptions.enableOracle) {
+    	JSScript *script = inspector->getScript();
+    	specialization_ = inspector->getRuntime()->oracle->inspectorTypeData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), specialization_);
     }
     if (specialization_ != MIRType_None) {
         setResultType(specialization_);
@@ -2277,11 +2286,15 @@ MCompare::infer(BaselineInspector *inspector, jsbytecode *pc)
 
     if (!strictEq) {
         compareType_ = inspector->expectedCompareType(pc);
-        if (jit::js_JitOptions.enableMonitor && compareType_ != MCompare::Compare_Unknown) {
-        	JSScript *script = inspector->getScript();
-        	//printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
-        	inspector->getRuntime()->jsmonitor->setCompareType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
-        }
+//        if (jit::js_JitOptions.enableMonitor && compareType_ != MCompare::Compare_Unknown) {
+//        	JSScript *script = inspector->getScript();
+//        	//printf("InspectorCompareType;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+//        	inspector->getRuntime()->jsmonitor->setCompareType(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+//        }
+//        if (jit::js_JitOptions.enableOracle) {
+//        	JSScript *script = inspector->getScript();
+//        	compareType_ = inspector->getRuntime()->oracle->inspectorCompareTypeData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), compareType_);
+//        }
     }
 }
 

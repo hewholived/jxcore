@@ -1410,7 +1410,8 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     uint32_t *addressOfUseCount() { return &useCount; }
     static size_t offsetOfUseCount() { return offsetof(JSScript, useCount); }
     void resetUseCount() {
-    	if (tsCount != 1000)
+    	//if (strcmp("self-hosted", filename())) printf("Use count reset for %s:%d:%d   %d\n", filename(), lineno(), column(), useCount);
+    	if (js::jit::js_JitOptions.enableOracle && tsCount != 1000)
     		useCount = 1000 - tsCount - 10;
     	else
     		useCount = 0;

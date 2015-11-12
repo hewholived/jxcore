@@ -1500,7 +1500,7 @@ JSFunction::createScriptForLazilyInterpretedFunction(JSContext *cx, HandleFuncti
         	if (tsValue == 1000)
         		tsValue = cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column());
         	if (tsValue >= 0 && tsValue < 900) {
-        		script->setUseCount(1000 - tsValue - 100);
+        		script->setUseCount(1000 - tsValue - 10);
         		script->setTSCount(tsValue);
         		//printf("Setting the usecount to %d\n", 1000 - tsValue);
         	}

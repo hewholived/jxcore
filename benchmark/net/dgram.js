@@ -10,14 +10,14 @@ var bench = common.createBenchmark(main, {
   len: [1024],
   num: [100],
   type: ['recv'],
-  dur: [0.25]
+  dur: [1]
 });
 /*
 var bench = common.createBenchmark(main, {
   len: [1, 64, 256, 1024],
   num: [100],
   type: ['send', 'recv'],
-  dur: [0.25]
+  dur: [1]
 });
 */
 var dur;

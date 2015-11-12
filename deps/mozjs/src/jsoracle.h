@@ -12,6 +12,7 @@
 
 //#include "jscntxt.h"
 #include "jsscript.h"
+#include "jit/IonTypes.h"
 //#include "jsinfer.h"
 //#include "jstypes.h"
 
@@ -30,6 +31,8 @@ public:
 	void Init(int id);
 	int getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column);
 	void getTypeInfos(JSContext *context, JSScript *script);
+	bool inspectorBoolData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
+	js::jit::MIRType inspectorTypeData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, js::jit::MIRType curType);
 };
 }
 

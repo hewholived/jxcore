@@ -1809,12 +1809,6 @@ AttachFinishedCompilations(JSContext *cx)
                 cx->clearPendingException();
             }
         }
-        if (js_JitOptions.enableMonitor) {
-        	printf("Logging the information\n");
-        	RootedScript script(cx, builder->script());
-        	cx->runtime()->jsmonitor->recordHotFunc(script->filename(),
-        			(int) script->lineno(), (int) script->column(), script->getTSCount());
-        }
 
         FinishOffThreadBuilder(builder);
     }
@@ -1897,6 +1891,17 @@ IonCompile(JSContext *cx, JSScript *script,
         return AbortReason_Alloc;
 
     IonContext ictx(cx, temp);
+
+    if (js_JitOptions.enableMonitor && script->getUseCount() > 50)
+        cx->runtime()->jsmonitor->recordHotFunc(script->filename(), script->lineno(), script->column(), script->getTSCount());
+
+    if (js_JitOptions.enableOracle && !script->isOracled()) {
+    	if (cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column()) != -1) {
+    		cx->runtime()->oracle->getTypeInfos(cx, script);
+    		//printf("Setting oracle info for %s:%d:%d\n", script->filename(), script->lineno(), script->column());
+    	}
+    	script->setOracled();
+    }
 
     types::AutoEnterAnalysis enter(cx);
 
@@ -2729,6 +2734,9 @@ jit::Invalidate(types::TypeZone &types, FreeOp *fop,
 
         IonSpew(IonSpew_Invalidate, " Invalidate %s:%u, IonScript %p",
                 co.script()->filename(), co.script()->lineno(), co.ion());
+
+//        printf(" Invalidate %s:%u:%u\n",
+//                        co.script()->filename(), co.script()->lineno(), co.script()->column());
 
         // Keep the ion script alive during the invalidation and flag this
         // ionScript as being invalidated.  This increment is removed by the

@@ -147,15 +147,16 @@ IonBuilder::IonBuilder(JSContext *analysisContext, CompileCompartment *comp,
     pc = info->startPC();
     abortReason_ = AbortReason_Disable;
     //printf("Created an IonBuilder %s:%d:%d(%d, %d)\n", script_->filename(), script_->lineno(), script_->column(), script_->getTSCount(), script_->getUseCount());
-    if (js_JitOptions.enableMonitor && script_->getUseCount() > 50)
-        context->runtime()->jsmonitor->recordHotFunc(script_->filename(), script_->lineno(), script_->column(), script_->getTSCount());
-
-    if (js_JitOptions.enableOracle && !script_->isOracled()) {
-    	if (context->runtime()->oracle->getHotnessThreshold(script_->filename(), script_->lineno(), script_->column()) != -1) {
-    		context->runtime()->oracle->getTypeInfos(context, script_);
-    	}
-    	script_->setOracled();
-    }
+//    if (js_JitOptions.enableMonitor && script_->getUseCount() > 50)
+//        context->runtime()->jsmonitor->recordHotFunc(script_->filename(), script_->lineno(), script_->column(), script_->getTSCount());
+//
+//    if (js_JitOptions.enableOracle && !script_->isOracled()) {
+//    	if (context->runtime()->oracle->getHotnessThreshold(script_->filename(), script_->lineno(), script_->column()) != -1) {
+//    		context->runtime()->oracle->getTypeInfos(context, script_);
+//    		printf("Setting oracle info for %s:%d:%d\n", script_->filename(), script_->lineno(), script_->column());
+//    	}
+//    	script_->setOracled();
+//    }
 
     JS_ASSERT(script()->hasBaselineScript() == (info->executionMode() != ArgumentsUsageAnalysis));
     JS_ASSERT(!!analysisContext == (info->executionMode() == DefinitePropertiesAnalysis));
@@ -581,6 +582,10 @@ IonBuilder::analyzeNewLoopTypes(MBasicBlock *entry, jsbytecode *start, jsbytecod
                 	//printf("InspectorResultType;%s+%d+%d+%d;%d\n", script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
                 	context->runtime()->jsmonitor->setInspectorResultType(script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
                 }
+                if (jit::js_JitOptions.enableOracle && context->runtime() != nullptr) {
+                	type = context->runtime()->oracle->inspectorTypeData(script()->filename(), script()->lineno(), script()->column(), script()->pcToOffset(pc), type);
+                }
+                break;
               default:
                 break;
             }
@@ -7381,6 +7386,11 @@ IonBuilder::getElemTryCache(bool *emitted, MDefinition *obj, MDefinition *index)
 		context->runtime()->jsmonitor->setNonNativeGetElem(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), nonNativeGetElement);
 	}
 
+    if (jit::js_JitOptions.enableOracle && context->runtime() != nullptr) {
+    	JSScript *script = inspector->getScript();
+    	nonNativeGetElement = nonNativeGetElement || context->runtime()->oracle->inspectorBoolData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc));
+    }
+
     if (index->mightBeType(MIRType_Int32) && nonNativeGetElement)
         return true;
 
@@ -9255,6 +9265,11 @@ IonBuilder::getPropTryCache(bool *emitted, MDefinition *obj, PropertyName *name,
 		//printf("InspectorSeenAccessedGetter;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 		inspector->getRuntime()->jsmonitor->setSeenAccessedGetter(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 	}
+    if (jit::js_JitOptions.enableOracle && context->runtime() != nullptr) {
+    	JSScript *script = inspector->getScript();
+    	retVal = retVal || context->runtime()->oracle->inspectorBoolData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc));
+    }
+
 
     if (retVal)
         barrier = BarrierKind::TypeSet;
@@ -10121,11 +10136,15 @@ IonBuilder::jsop_iternext()
         return false;
 
     bool retVal = inspector->hasSeenNonStringIterNext(pc);
-    if (jit::js_JitOptions.enableMonitor && retVal && context->runtime() != nullptr) {
+    if (jit::js_JitOptions.enableMonitor && context->runtime() != nullptr) {
 		JSScript *script = inspector->getScript();
-		//printf("InspectorSeenNonString;%s+%d+%d+%d;%d\n", script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 		context->runtime()->jsmonitor->setSeenNonString(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc), retVal);
 	}
+
+    if (jit::js_JitOptions.enableOracle && context->runtime() != nullptr) {
+    	JSScript *script = inspector->getScript();
+    	retVal = retVal || context->runtime()->oracle->inspectorBoolData(script->filename(), script->lineno(), script->column(), script->pcToOffset(pc));
+    }
 
     if (!nonStringIteration_ && !retVal) {
         ins = MUnbox::New(alloc(), ins, MIRType_String, MUnbox::Fallible,

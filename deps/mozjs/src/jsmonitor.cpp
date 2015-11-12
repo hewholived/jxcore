@@ -66,7 +66,6 @@ js::JSMonitor::Init(int threadID)
 	char *zErrMsg = 0;
 	char filename[100];
 
-	//sprintf(filename, "monitor%d.db", threadID);
 	sprintf(filename, ":memory:");
 
 	if (sqlite3_open(filename, &monitorDb) != 0) {
@@ -120,6 +119,18 @@ js::JSMonitor::Init(int threadID)
 	}
 
 	sql = "CREATE TABLE INSPECTORTYPES("  \
+			"NAME           CHAR(100)    NOT NULL," \
+			"PCOFFSET		INT			NOT NULL," \
+			"TYPE           INT         NOT NULL," \
+			"UNIQUE (NAME, PCOFFSET, TYPE));";
+
+	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	sql = "CREATE TABLE BAILOUTS("  \
 			"NAME           CHAR(100)    NOT NULL," \
 			"PCOFFSET		INT			NOT NULL," \
 			"TYPE           INT         NOT NULL," \
@@ -250,6 +261,29 @@ js::JSMonitor::setInspectorResultType(const char* fileName, long unsigned int li
 		sqlite3_free(zErrMsg);
 		return;
 	}
+}
+
+void
+js::JSMonitor::recordBailout(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int bailoutkind)
+{
+	if (bailoutkind == 1)
+		return;
+
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	sqlite3 *monitorDb = getMonitorDb();
+
+	if (monitorDb == nullptr)
+		return;
+	sprintf(buff,"INSERT INTO BAILOUTS (NAME, PCOFFSET, TYPE) VALUES ('%s:%d:%d', %d, %d);", fileName, lineNo, column, pc, bailoutkind);
+	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return;
+	}
+
 }
 
 void
