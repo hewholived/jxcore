@@ -9,13 +9,13 @@ var common = require('../common.js');
 /*var bench = common.createBenchmark(main, {
   len: [102400, 1024 * 1024 * 16],
   type: ['utf', 'asc', 'buf'],
-  dur: [600]
+  dur: [5.0]
 });
 */
 var bench = common.createBenchmark(main, {
   len: [1024 * 1024 * 16],
   type: ['asc'],
-  dur: [1]
+  dur: [5.0]
 });
 
 

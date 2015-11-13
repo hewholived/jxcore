@@ -6,13 +6,13 @@ var filename = path.resolve(__dirname, '.removeme-benchmark-garbage');
 var fs = require('fs');
 
 /*var bench = common.createBenchmark(main, {
-  dur: [5],
+  dur: [3.75],
   type: ['buf', 'asc', 'utf'],
   size: [2, 1024, 65535, 1024 * 1024]
 });
 */
 var bench = common.createBenchmark(main, {
-  dur: [15],
+  dur: [3.75],
   type: ['asc'],
   size: [1024 * 1024]
 });

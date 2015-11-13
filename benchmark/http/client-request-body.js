@@ -4,14 +4,14 @@ var common = require('../common.js');
 var http = require('http');
 
 /*var bench = common.createBenchmark(main, {
-  dur: [5],
+  dur: [5.0],
   type: ['asc', 'utf', 'buf'],
   bytes: [32, 256, 1024],
   method: ['write', 'end  '] // two spaces added to line up each row
 });
 */
 var bench = common.createBenchmark(main, {
-  dur: [15],
+  dur: [5.0],
   type: ['buf'],
   bytes: [1024],
   method: ['write'] // two spaces added to line up each row

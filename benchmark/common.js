@@ -181,13 +181,13 @@ Benchmark.prototype.end = function(operations) {
     throw new Error('called end() without specifying operation count');
   var time = elapsed[0] + elapsed[1]/1e9;
   var rate = operations/time;
-  this.report(rate);
+  this.report(rate, operations);
 };
 
-Benchmark.prototype.report = function(value) {
+Benchmark.prototype.report = function(value, operations) {
   var heading = this.getHeading();
   if (!silent)
-    console.log('%s: %s', heading, value.toPrecision(5));
+    console.log('%s operations=%s: %s', heading, operations, value.toPrecision(5));
   process.exit(0);
 };
 

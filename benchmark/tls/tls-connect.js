@@ -6,12 +6,12 @@ var assert = require('assert'),
 var common = require('../common.js');
 var bench = common.createBenchmark(main, {
   concurrency: [10],
-  dur: [15]
+  dur: [5.0]
 });
 
 /*var bench = common.createBenchmark(main, {
   concurrency: [1, 10],
-  dur: [5]
+  dur: [5.0]
 });
 */
 var clientConn = 0;

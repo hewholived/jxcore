@@ -8,13 +8,13 @@ var filename = path.resolve(__dirname, '.removeme-benchmark-garbage');
 var fs = require('fs');
 
 var bench = common.createBenchmark(main, {
-  dur: [15],
+  dur: [1.75],
   len: [16 * 1024 * 1024],
   concurrent: [10]
 });
 
 /*var bench = common.createBenchmark(main, {
-  dur: [5],
+  dur: [1.75],
   len: [1024, 16 * 1024 * 1024],
   concurrent: [1, 10]
 });

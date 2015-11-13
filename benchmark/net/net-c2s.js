@@ -6,12 +6,12 @@ var PORT = common.PORT;
 /*var bench = common.createBenchmark(main, {
   len: [102400, 1024 * 1024 * 16],
   type: ['utf', 'asc', 'buf'],
-  dur: [5],
+  dur: [5.0],
 });*/
 var bench = common.createBenchmark(main, {
   len: [1024 * 1024 * 16],
   type: ['utf'],
-  dur: [1],
+  dur: [5.0],
 });
 
 
