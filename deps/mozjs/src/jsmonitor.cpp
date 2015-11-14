@@ -75,8 +75,8 @@ js::JSMonitor::Init(int threadID)
 
 	sql = "CREATE TABLE HOTFUNCS("  \
 			"NAME           CHAR(100)    NOT NULL," \
-			"TSCOUNT		INT			NOT NULL," \
-			"PRIMARY KEY(NAME));";
+			"PCOFFSET		INT			NOT NULL," \
+			"COUNT			INT			NOT NULL);";
 
 	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
 	if( rc != SQLITE_OK ){
@@ -202,25 +202,54 @@ js::JSMonitor::recordShapeDeopt(const char* fileName, long unsigned int lineNo, 
 }
 
 void
-js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column, int tsCount)
+js::JSMonitor::recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column, std::map<int, int> objData)
 {
 	int rc = 0;
 	char *zErrMsg = 0;
-	char buff[500];
 	sqlite3 *monitorDb = getMonitorDb();
 
 	if (monitorDb == nullptr)
 		return;
+	char *buff = (char *)malloc(100 * sizeof(char) * objData);
+//	sprintf(buff, "INSERT INTO HOTFUNCS SELECT ");
+//
+//	typedef std::map<int, int>::iterator it_type;
+//	int index = 0;
+//	for(it_type iterator = objData.begin(); iterator != objData.end(); iterator++) {
+//		if (index == 0)
+//			sprintf(buff, "%s '%s:%d:%d' AS NAME, %d AS PCOFFSET, %d AS COUNT ", buff, fileName, lineNo, column, iterator->first, iterator->second);
+//		else
+//			sprintf(buff, "%s UNION SELECT '%s:%d:%d', %d, %d ", buff, fileName, lineNo, column, iterator->first, iterator->second);
+//		index++;
+//	}
 
-	//printf("Recording hot function\n");
-	sprintf(buff,"INSERT INTO HOTFUNCS (NAME, TSCOUNT) VALUES ('%s:%d:%d', %d);", fileName, lineNo, column, tsCount);
-	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+	typedef std::map<int, int>::iterator it_type;
+	for(it_type iterator = objData.begin(); iterator != objData.end(); iterator++) {
+		int pc = iterator->first;
+		int count = iterator->second;
+		sprintf(buff, "INSERT INTO HOTFUNCS(NAME, PCOFFSET, COUNT) VALUES ('%s:%d:%d', %d, "\
+				"COALESCE((SELECT COUNT FROM HOTFUNCS WHERE NAME='%s:%d:%d' AND PCOFFSET=%d AND COUNT>%d), %d));",
+				fileName, lineNo, column, pc, fileName, lineNo, column, pc, count, count);
+		printf("Query:%s\n", buff);
+		rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 
-	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
-		sqlite3_free(zErrMsg);
-		return;
+		if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
+			fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+
 	}
+	free(buff);
+
+//	printf("Query:%s\n", buff);
+//	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+//
+//	free(buff);
+//	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
+//		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
+//		sqlite3_free(zErrMsg);
+//		return;
+//	}
 }
 
 void

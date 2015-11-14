@@ -1892,11 +1892,12 @@ IonCompile(JSContext *cx, JSScript *script,
 
     IonContext ictx(cx, temp);
 
-    if (js_JitOptions.enableMonitor && script->getUseCount() > 50)
-        cx->runtime()->jsmonitor->recordHotFunc(script->filename(), script->lineno(), script->column(), script->getTSCount());
+    if (js_JitOptions.enableMonitor && script->getUseCount() > 50) {
+        cx->runtime()->jsmonitor->recordHotFunc(script->filename(), script->lineno(), script->column(), script->getObjProfileCountData());
+    }
 
     if (js_JitOptions.enableOracle && !script->isOracled()) {
-    	if (cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column()) != -1) {
+    	if (cx->runtime()->oracle->isHot(script->filename(), script->lineno(), script->column())) {
     		cx->runtime()->oracle->getTypeInfos(cx, script);
     		//printf("Setting oracle info for %s:%d:%d\n", script->filename(), script->lineno(), script->column());
     	}

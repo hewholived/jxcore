@@ -801,8 +801,6 @@ TypeScript::SetThis(JSContext *cx, JSScript *script, Type type, jsbytecode *pc)
         InferSpew(ISpewOps, "externalType: setThis #%u: %s",
                   script->id(), TypeString(type));
         ThisTypes(script)->addType(cx, type);
-        if (jit::js_JitOptions.enableMonitor)
-        	script->setTSCount(script->getUseCount());
     }
 }
 
@@ -824,8 +822,6 @@ TypeScript::SetArgument(JSContext *cx, JSScript *script, unsigned arg, Type type
         InferSpew(ISpewOps, "externalType: setArg #%u %u: %s",
                   script->id(), arg, TypeString(type));
         ArgTypes(script, arg)->addType(cx, type);
-        if (jit::js_JitOptions.enableMonitor)
-        	script->setTSCount(script->getUseCount());
     }
 }
 

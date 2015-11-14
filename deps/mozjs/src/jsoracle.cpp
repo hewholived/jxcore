@@ -28,7 +28,7 @@ js::Oracle::Init(int id)
 	sprintf(filename, "monitor%d.db", id);
 
 	if (sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, nullptr) != 0) {
-		printf("Monitor: Db init error.\n");
+		//printf("Monitor: Db init error.\n");
 		db = nullptr;
 		return;
 	}
@@ -118,7 +118,7 @@ js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
 }
 
 static int
-inspectorBoolCallback(void *passPtr, int argc, char **argv, char **azColName)
+boolCallback(void *passPtr, int argc, char **argv, char **azColName)
 {
 	bool *retVal = (bool *) passPtr;
 
@@ -143,7 +143,7 @@ js::Oracle::inspectorBoolData(const char* fileName, long unsigned int lineNo, lo
 
 	sprintf(buff,"SELECT TYPE FROM INSPECTORTYPES WHERE NAME='%s:%d:%d' AND PCOFFSET=%d;", fileName, lineNo, column, pc);
 	//printf("Query:%s\n", buff);
-	rc = sqlite3_exec(db, buff, inspectorBoolCallback, (void *)retVal, &zErrMsg);
+	rc = sqlite3_exec(db, buff, boolCallback, (void *)retVal, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
@@ -215,6 +215,31 @@ js::Oracle::inspectorTypeData(const char* fileName, long unsigned int lineNo, lo
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return curType;
+	}
+
+	return *retVal;
+}
+
+bool
+js::Oracle::isHot(const char* fileName, long unsigned int lineNo, long unsigned int column)
+{
+	if (db == nullptr)
+		return false;
+
+	bool *retVal = (bool *)malloc(1);
+	*retVal = false;
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+
+
+	sprintf(buff,"SELECT EXISTS(SELECT 1 FROM HOTFUNCS WHERE NAME='%s:%d:%d');", fileName, lineNo, column);
+	//printf("Query:%s\n", buff);
+	rc = sqlite3_exec(db, buff, boolCallback, (void *)retVal, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return false;
 	}
 
 	return *retVal;

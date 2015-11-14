@@ -826,6 +826,7 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
                                  * discarded. */
     uint32_t		tsCount;
     bool			oracled_;
+    std::map<int, int> profileCountMap;
 
 #ifdef DEBUG
     // Unique identifier within the compartment for this script, used for
@@ -1436,6 +1437,17 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     {
     	oracled_ = false;
     }
+
+    void setObjectShapeCount(int nCount, int pc)
+    {
+    	if (profileCountMap[pc] < nCount)
+    		profileCountMap[pc] = nCount;
+    }
+
+    std::map<int, int> getObjProfileCountData()
+	{
+    	return profileCountMap;
+	}
 
   public:
     bool initScriptCounts(JSContext *cx);

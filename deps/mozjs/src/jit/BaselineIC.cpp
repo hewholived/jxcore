@@ -1551,10 +1551,6 @@ DoTypeUpdateFallback(JSContext *cx, BaselineFrame *frame, ICUpdatedStub *stub, H
         MOZ_CRASH("Invalid stub");
     }
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	script->setTSCount(script->getUseCount());
-    }
-
     return stub->addUpdateStubForValue(cx, script, obj, id, value);
 }
 
@@ -1680,12 +1676,6 @@ DoCallNativeGetter(JSContext *cx, HandleFunction callee, HandleObject obj,
 
     result.set(vp[0]);
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-    	script->setTSCount(script->getUseCount());
-    }
-
     return true;
 }
 
@@ -1709,11 +1699,6 @@ DoThisFallback(JSContext *cx, ICThis_Fallback *stub, HandleValue thisv, MutableH
 
     ret.setObject(*thisObj);
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-    	script->setTSCount(script->getUseCount());
-    }
     return true;
 }
 
@@ -4082,13 +4067,13 @@ DoGetElemFallback(JSContext *cx, BaselineFrame *frame, ICGetElem_Fallback *stub_
         return true;
     }
 
-    if (jit::js_JitOptions.enableMonitor) {
-		script->setTSCount(script->getUseCount());
-	}
-
     // Try to attach an optimized stub.
     if (!TryAttachGetElemStub(cx, frame->script(), pc, stub, lhs, rhs, res))
         return false;
+
+    if (jit::js_JitOptions.enableMonitor) {
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+    }
 
     return true;
 }
@@ -5069,9 +5054,6 @@ DoSetElemFallback(JSContext *cx, BaselineFrame *frame, ICSetElem_Fallback *stub_
         // But for now we just bail.
         return true;
     }
-    if (jit::js_JitOptions.enableMonitor) {
-    	script->setTSCount(script->getUseCount());
-    }
 
     // Try to generate new stubs.
     if (obj->isNative() &&
@@ -5120,6 +5102,10 @@ DoSetElemFallback(JSContext *cx, BaselineFrame *frame, ICSetElem_Fallback *stub_
             }
         }
 
+        if (jit::js_JitOptions.enableMonitor) {
+        	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+        }
+
         return true;
     }
 
@@ -5150,10 +5136,16 @@ DoSetElemFallback(JSContext *cx, BaselineFrame *frame, ICSetElem_Fallback *stub_
                 return false;
 
             stub->addNewStub(typedArrayStub);
+            if (jit::js_JitOptions.enableMonitor) {
+            	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+            }
             return true;
         }
     }
 
+    if (jit::js_JitOptions.enableMonitor) {
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+    }
     return true;
 }
 
@@ -5905,7 +5897,7 @@ DoGetNameFallback(JSContext *cx, BaselineFrame *frame, ICGetName_Fallback *stub_
             return false;
     }
     if (jit::js_JitOptions.enableMonitor) {
-    	script->setTSCount(script->getUseCount());
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
     }
 
     return true;
@@ -6017,11 +6009,6 @@ DoBindNameFallback(JSContext *cx, BaselineFrame *frame, ICBindName_Fallback *stu
     if (!LookupNameUnqualified(cx, name, scopeChain, &scope))
         return false;
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
-    }
-
     res.setObject(*scope);
     return true;
 }
@@ -6082,11 +6069,10 @@ DoGetIntrinsicFallback(JSContext *cx, BaselineFrame *frame, ICGetIntrinsic_Fallb
     if (!newStub)
         return false;
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	script->setTSCount(script->getUseCount());
-    }
-
     stub->addNewStub(newStub);
+    if (jit::js_JitOptions.enableMonitor) {
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+    }
     return true;
 }
 
@@ -6600,7 +6586,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		script->setTSCount(script->getUseCount());
+    		script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
     	}
         return true;
     }
@@ -6612,7 +6598,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		script->setTSCount(script->getUseCount());
+    		script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
     	}
         return true;
     }
@@ -6623,7 +6609,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         if (attached) {
         	if (jit::js_JitOptions.enableMonitor) {
         		JSScript *script = frame->script();
-        		script->setTSCount(script->getUseCount());
+        		script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
         	}
             return true;
         }
@@ -6636,7 +6622,7 @@ DoGetPropFallback(JSContext *cx, BaselineFrame *frame, ICGetProp_Fallback *stub_
         if (attached) {
         	if (jit::js_JitOptions.enableMonitor) {
         		JSScript *script = frame->script();
-        		script->setTSCount(script->getUseCount());
+        		script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
         	}
             return true;
         }
@@ -7643,11 +7629,6 @@ DoSetPropFallback(JSContext *cx, BaselineFrame *frame, ICSetProp_Fallback *stub_
         return true;
     }
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
-    }
-
     bool attached = false;
     if (!TryAttachSetPropStub(cx, script, pc, stub, obj, oldShape, oldSlots, name, id, rhs,
          &attached))
@@ -7657,7 +7638,7 @@ DoSetPropFallback(JSContext *cx, BaselineFrame *frame, ICSetProp_Fallback *stub_
     if (attached) {
     	if (jit::js_JitOptions.enableMonitor) {
     		JSScript *script = frame->script();
-    		script->setTSCount(script->getUseCount());
+    		script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
     	}
         return true;
     }
@@ -8036,11 +8017,6 @@ DoCallNativeSetter(JSContext *cx, HandleFunction callee, HandleObject obj, Handl
     vp[1].setObject(*obj.get());
     vp[2].set(val);
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-    	script->setTSCount(script->getUseCount());
-    }
     return natfun(cx, 1, vp.begin());
 }
 
@@ -8513,7 +8489,7 @@ DoCallFallback(JSContext *cx, BaselineFrame *frame, ICCall_Fallback *stub_, uint
 
     if (jit::js_JitOptions.enableMonitor) {
     	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
     }
     return true;
 }
@@ -8568,6 +8544,10 @@ DoSpreadCallFallback(JSContext *cx, BaselineFrame *frame, ICCall_Fallback *stub_
     if (!stub->addMonitorStubForValue(cx, script, res))
         return false;
 
+    if (jit::js_JitOptions.enableMonitor) {
+    	JSScript *script = frame->script();
+    	script->setObjectShapeCount(stub->numOptimizedStubs(), script->pcToOffset(pc));
+    }
     return true;
 }
 
@@ -9764,10 +9744,7 @@ DoIteratorNewFallback(JSContext *cx, BaselineFrame *frame, ICIteratorNew_Fallbac
 
     uint8_t flags = GET_UINT8(pc);
     res.set(value);
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
-    }
+
     return ValueToIterator(cx, flags, res);
 }
 
@@ -9821,11 +9798,6 @@ DoIteratorMoreFallback(JSContext *cx, BaselineFrame *frame, ICIteratorMore_Fallb
         if (!newStub)
             return false;
         stub->addNewStub(newStub);
-    }
-
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
     }
 
     return true;
@@ -9916,10 +9888,6 @@ DoIteratorNextFallback(JSContext *cx, BaselineFrame *frame, ICIteratorNext_Fallb
         if (!newStub)
             return false;
         stub->addNewStub(newStub);
-    }
-    if (jit::js_JitOptions.enableMonitor) {
-    	JSScript *script = frame->script();
-    	script->setTSCount(script->getUseCount());
     }
 
     return true;
@@ -10036,11 +10004,6 @@ DoInstanceOfFallback(JSContext *cx, ICInstanceOf_Fallback *stub,
     if (!HasInstance(cx, obj, lhs, &cond))
         return false;
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-    	script->setTSCount(script->getUseCount());
-    }
     res.setBoolean(cond);
     return true;
 }
@@ -10091,12 +10054,6 @@ DoTypeOfFallback(JSContext *cx, BaselineFrame *frame, ICTypeOf_Fallback *stub, H
         stub->addNewStub(typeOfStub);
     }
 
-    if (jit::js_JitOptions.enableMonitor) {
-    	jsbytecode *pc;
-    	JSScript *script = cx->currentScript(&pc);
-
-    	script->setTSCount(script->getUseCount());
-    }
     return true;
 }
 
