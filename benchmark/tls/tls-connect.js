@@ -6,7 +6,7 @@ var assert = require('assert'),
 var common = require('../common.js');
 var bench = common.createBenchmark(main, {
   concurrency: [10],
-  dur: [5.0]
+  dur: [5]
 });
 
 /*var bench = common.createBenchmark(main, {

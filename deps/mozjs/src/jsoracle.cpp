@@ -3,6 +3,22 @@
 #include "jsinferinlines.h"
 
 
+static int
+hotFunCallback(void *passPtr, int argc, char **argv, char **azColName)
+{
+	int *retval = (int *) passPtr;
+
+	//printf("in callback %p:", retval);
+	if (argc == 0 || argc > 1) {
+		retval[0] = -1;
+	} else {
+		retval[0] = argv[0] ? atoi(argv[0]) : -1;
+		//printf("%d\n", atoi(argv[0]));
+	}
+
+	return 0;
+}
+
 js::Oracle::Oracle(int id)
 {
 	index = id;
@@ -32,26 +48,39 @@ js::Oracle::Init(int id)
 		db = nullptr;
 		return;
 	}
+
+	checkFreqBailouts();
+}
+
+void
+js::Oracle::checkFreqBailouts()
+{
+	if (db == nullptr) {
+		freqBailouts = false;
+		return;
+	}
+
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	int* value = (int *)malloc(1);
+	value[0] = false;
+
+	sprintf(buff,"SELECT EXISTS(SELECT 1 FROM FREQBAILOUT);");
+	//printf("Query:%s\n", buff);
+	rc = sqlite3_exec(db, buff, hotFunCallback, (void *)value, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		freqBailouts = false;
+		return;
+	}
+
+	freqBailouts = (bool)value[0];
 }
 
 js::Oracle::~Oracle() {
 	sqlite3_close(db);
-}
-
-static int
-hotFunCallback(void *passPtr, int argc, char **argv, char **azColName)
-{
-	int *retval = (int *) passPtr;
-
-	//printf("in callback %p:", retval);
-	if (argc == 0 || argc > 1) {
-		retval[0] = -1;
-	} else {
-		retval[0] = argv[0] ? atoi(argv[0]) : -1;
-		//printf("%d\n", atoi(argv[0]));
-	}
-
-	return 0;
 }
 
 int
@@ -218,4 +247,28 @@ js::Oracle::inspectorTypeData(const char* fileName, long unsigned int lineNo, lo
 	}
 
 	return *retVal;
+}
+
+bool
+js::Oracle::isFreqBailedOut(const char* fileName, long unsigned int lineNo, long unsigned int column)
+{
+	if (db == nullptr || !freqBailouts)
+		return false;
+
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	int* value = (int *)malloc(1);
+	value[0] = false;
+
+	sprintf(buff,"SELECT EXISTS(SELECT 1 FROM FREQBAILOUT WHERE NAME='%s:%d:%d');", fileName, lineNo, column);
+	//printf("Query:%s\n", buff);
+	rc = sqlite3_exec(db, buff, hotFunCallback, (void *)value, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return false;
+	}
+
+	return (bool)value[0];
 }

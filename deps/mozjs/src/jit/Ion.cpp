@@ -1895,13 +1895,19 @@ IonCompile(JSContext *cx, JSScript *script,
     if (js_JitOptions.enableMonitor && script->getUseCount() > 50)
         cx->runtime()->jsmonitor->recordHotFunc(script->filename(), script->lineno(), script->column(), script->getTSCount());
 
-    if (js_JitOptions.enableOracle && !script->isOracled()) {
-    	if (cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column()) != -1) {
-    		cx->runtime()->oracle->getTypeInfos(cx, script);
-    		//printf("Setting oracle info for %s:%d:%d\n", script->filename(), script->lineno(), script->column());
+    if (js_JitOptions.enableOracle) {
+    	if (cx->runtime()->oracle->isFreqBailedOut(script->filename(), script->lineno(), script->column())) {
+    		return AbortReason_Disable;
     	}
-    	script->setOracled();
+//    	if(!script->isOracled()) {
+//    		if (cx->runtime()->oracle->getHotnessThreshold(script->filename(), script->lineno(), script->column()) != -1) {
+//    			cx->runtime()->oracle->getTypeInfos(cx, script);
+//    			printf("Setting oracle info for %s:%d:%d\n", script->filename(), script->lineno(), script->column());
+//    		}
+//    		script->setOracled();
+//    	}
     }
+    //printf("Compiling %s:%d:%d\n", script->filename(), script->lineno(), script->column());
 
     types::AutoEnterAnalysis enter(cx);
 

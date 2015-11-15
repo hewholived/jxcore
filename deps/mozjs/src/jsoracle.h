@@ -25,11 +25,14 @@ namespace js {
 class Oracle {
 	int index;
 	sqlite3* db;
+	bool freqBailouts;
+	void checkFreqBailouts();
 public:
 	Oracle(int id);
 	~Oracle();
 	void Init(int id);
 	int getHotnessThreshold(const char* fileName, long unsigned int lineNo, long unsigned int column);
+	bool isFreqBailedOut(const char* fileName, long unsigned int lineNo, long unsigned int column);
 	void getTypeInfos(JSContext *context, JSScript *script);
 	bool inspectorBoolData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
 	js::jit::MIRType inspectorTypeData(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, js::jit::MIRType curType);

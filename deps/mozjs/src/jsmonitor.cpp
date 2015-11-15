@@ -142,6 +142,15 @@ js::JSMonitor::Init(int threadID)
 		sqlite3_free(zErrMsg);
 	}
 
+	sql = "CREATE TABLE FREQBAILOUT("  \
+			"NAME           CHAR(100)    NOT NULL);";
+
+	rc = sqlite3_exec(monitorDb, sql, callback, 0, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		//fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
 	time (&start);
 }
 
@@ -284,6 +293,27 @@ js::JSMonitor::recordBailout(const char* fileName, long unsigned int lineNo, lon
 		return;
 	}
 
+}
+
+void
+js::JSMonitor::recordFreqBailout(const char* fileName, long unsigned int lineNo, long unsigned int column)
+{
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	sqlite3 *monitorDb = getMonitorDb();
+
+	if (monitorDb == nullptr)
+		return;
+
+	sprintf(buff,"INSERT INTO FREQBAILOUT (NAME) VALUES ('%s:%d:%d');", fileName, lineNo, column);
+	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
+
+	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return;
+	}
 }
 
 void

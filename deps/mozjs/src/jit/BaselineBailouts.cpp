@@ -881,10 +881,14 @@ InitFromBailout(JSContext *cx, HandleScript caller, jsbytecode *callerPC,
     	cx->runtime()->jsmonitor->recordBailout(script->filename(),
                                               (int) script->lineno(), (int) script->column(),
                                               pcOff, bailoutKind);
-      printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(),
-                                              (int) script->lineno(), (int) script->column(),
-                                              pcOff, BailoutKindString(bailoutKind));
+//      printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(),
+//                                              (int) script->lineno(), (int) script->column(),
+//                                              pcOff, BailoutKindString(bailoutKind));
     }
+//    if (bailoutKind != Bailout_ObjectIdentityOrTypeGuard)
+//    printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(),
+//                                                  (int) script->lineno(), (int) script->column(),
+//                                                  pcOff, BailoutKindString(bailoutKind));
 
     // If this was the last inline frame, or we are bailing out to a catch or
     // finally block in this frame, then unpacking is almost done.
@@ -1354,6 +1358,11 @@ jit::BailoutIonToBaseline(JSContext *cx, JitActivation *activation, IonBailoutIt
 
     if (!excInfo) {
         iter.ionScript()->incNumBailouts();
+    }
+    if (js_JitOptions.enableMonitor) {
+    	if (iter.ionScript()->numBailouts() == 11) {
+    		cx->runtime()->jsmonitor->recordFreqBailout(iter.script()->filename(), iter.script()->lineno(), iter.script()->column());
+    	}
     }
     iter.script()->updateBaselineOrIonRaw();
 

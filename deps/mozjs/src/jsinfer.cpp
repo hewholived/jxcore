@@ -2402,7 +2402,10 @@ TypeZone::processPendingRecompiles(FreeOp *fop)
 
     JS_ASSERT(!pending->empty());
 
-    jit::Invalidate(*this, fop, *pending);
+    if (jit::js_JitOptions.enableOracle)
+    	jit::Invalidate(*this, fop, *pending, false);
+    else
+    	jit::Invalidate(*this, fop, *pending);
 
     fop->delete_(pending);
 }
@@ -3710,6 +3713,8 @@ types::TypeMonitorResult(JSContext *cx, JSScript *script, jsbytecode *pc, const 
 
     InferSpew(ISpewOps, "bytecodeType: #%u:%05u: %s",
               script->id(), script->pcToOffset(pc), TypeString(type));
+
+    //printf("New type added %s:%d:%d\n", script->filename(), script->lineno(), script->column());
     types->addType(cx, type);
 }
 

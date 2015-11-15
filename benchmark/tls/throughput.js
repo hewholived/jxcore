@@ -1,12 +1,12 @@
 var common = require('../common.js');
 var bench = common.createBenchmark(main, {
-  dur: [5.0],
+  dur: [20],
   type: ['utf'],
   size: [1024 * 1024]
 });
 /*
 var bench = common.createBenchmark(main, {
-  dur: [5.0],
+  dur: [20],
   type: ['buf', 'asc', 'utf'],
   size: [2, 1024, 1024 * 1024]
 });

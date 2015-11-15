@@ -25,6 +25,7 @@ namespace js {
 	  void updateBytecodeType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
 	  void recordShapeDeopt(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc);
 	  void recordHotFunc(const char* fileName, long unsigned int lineNo, long unsigned int column, int tsCount);
+	  void recordFreqBailout(const char* fileName, long unsigned int lineNo, long unsigned int column);
 	  void updateObjectTypeCount(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int invocCount);
 	  void setInspectorResultType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
 	  void setCompareType(const char* fileName, long unsigned int lineNo, long unsigned int column, long unsigned int pc, int type);
