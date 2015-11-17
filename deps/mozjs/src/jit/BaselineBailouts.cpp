@@ -885,6 +885,9 @@ InitFromBailout(JSContext *cx, HandleScript caller, jsbytecode *callerPC,
 //                                              (int) script->lineno(), (int) script->column(),
 //                                              pcOff, BailoutKindString(bailoutKind));
     }
+    if (js_JitOptions.enableOracle) {
+    	script->setTypeStable(false);
+    }
 //    if (bailoutKind != Bailout_ObjectIdentityOrTypeGuard)
 //    printf("BailedOut;%d;%s;%d;%d;%d;%s\n", PCToLineNumber(script, pc), script->filename(),
 //                                                  (int) script->lineno(), (int) script->column(),

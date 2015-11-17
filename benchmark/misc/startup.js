@@ -7,7 +7,7 @@ var i = 0;
 var start;
 
 var bench = common.createBenchmark(startNode, {
-  dur: [0.5]
+  dur: [2.25]
 });
 
 function startNode(conf) {

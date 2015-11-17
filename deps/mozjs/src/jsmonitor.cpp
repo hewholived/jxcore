@@ -310,7 +310,7 @@ js::JSMonitor::recordFreqBailout(const char* fileName, long unsigned int lineNo,
 	rc = sqlite3_exec(monitorDb, buff, callback, 0, &zErrMsg);
 
 	if( rc != SQLITE_CONSTRAINT && rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: HOTFUNCS %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: FREQBAILOUT %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return;
 	}

@@ -2357,6 +2357,7 @@ JSScript::Create(ExclusiveContext *cx, HandleObject enclosingScope, bool savedCa
     if (jit::js_JitOptions.enableOracle) {
     	script->clearOracled();
     	script->setTSCount(1000);
+    	script->setTypeStable(false);
     }
 
     return script;
@@ -3079,9 +3080,16 @@ js::CloneScript(JSContext *cx, HandleObject enclosingScope, HandleFunction fun, 
     	tsValue = cx->runtime()->oracle->getHotnessThreshold(dst->filename(), dst->lineno(), dst->column());
     	if (tsValue > 0 && tsValue < 900) {
     		dst->setUseCount(1000 - tsValue - 10);
+    		dst->setTSCount(tsValue);
+    		bool typeStable = false;
+    		typeStable = cx->runtime()->oracle->isTypeStable(dst->filename(), dst->lineno(), dst->column());
+    		dst->setTypeStable(typeStable);
+    	}
+    	else {
+    		dst->setTSCount(1000);
     	}
     	dst->clearOracled();
-    	dst->setTSCount(1000);
+
     }
 
     return dst;

@@ -1892,7 +1892,7 @@ IonCompile(JSContext *cx, JSScript *script,
 
     IonContext ictx(cx, temp);
 
-    if (js_JitOptions.enableMonitor && script->getUseCount() > 50)
+    if (js_JitOptions.enableMonitor && script->getUseCount() > 50 && script->getTSCount() < 750)
         cx->runtime()->jsmonitor->recordHotFunc(script->filename(), script->lineno(), script->column(), script->getTSCount());
 
     if (js_JitOptions.enableOracle) {
@@ -2738,6 +2738,12 @@ jit::Invalidate(types::TypeZone &types, FreeOp *fop,
         if (!co.ion())
             continue;
 
+//        if (co.script()->isTypeStable() && !resetUses) {
+//        	printf("Not Invalidate %s:%u:%u\n",
+//        			co.script()->filename(), co.script()->lineno(), co.script()->column());
+//        	continue;
+//        }
+
         IonSpew(IonSpew_Invalidate, " Invalidate %s:%u, IonScript %p",
                 co.script()->filename(), co.script()->lineno(), co.ion());
 
@@ -2772,6 +2778,9 @@ jit::Invalidate(types::TypeZone &types, FreeOp *fop,
         IonScript *ionScript = co.ion();
         if (!ionScript)
             continue;
+
+//        if (script->isTypeStable() && !resetUses)
+//        	continue;
 
         SetIonScript(script, executionMode, nullptr);
         ionScript->decref(fop);

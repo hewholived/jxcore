@@ -2,9 +2,10 @@ import os
 import sys
 import sqlite3
 
-#benchmarks = ['./benchmark/http/client-request-body.js', './benchmark/misc/startup.js', './benchmark/net/dgram.js', './benchmark/net/net-c2s.js', './benchmark/net/net-pipe.js', './benchmark/net/net-s2c.js', './benchmark/tls/throughput.js', './benchmark/tls/tls-connect.js']
-benchmarks = ['./benchmark/net/net-c2s.js', './benchmark/net/net-pipe.js', './benchmark/net/net-s2c.js', './benchmark/tls/throughput.js', './benchmark/tls/tls-connect.js']
+benchmarks = ['./benchmark/http/client-request-body.js', './benchmark/misc/startup.js', './benchmark/net/dgram.js', './benchmark/net/net-c2s.js', './benchmark/net/net-pipe.js', './benchmark/net/net-s2c.js', './benchmark/tls/throughput.js', './benchmark/tls/tls-connect.js']
+#benchmarks = ['./benchmark/net/net-c2s.js', './benchmark/net/net-pipe.js', './benchmark/net/net-s2c.js', './benchmark/tls/throughput.js', './benchmark/tls/tls-connect.js']
 #benchmarks = ['./benchmark/tls/tls-connect.js']
+benchmarks = ['./benchmark/http/client-request-body.js', './benchmark/net/net-pipe.js', './benchmark/tls/throughput.js', './benchmark/tls/tls-connect.js']
 
 TIMES = 10
 MONITORDUR = "20"

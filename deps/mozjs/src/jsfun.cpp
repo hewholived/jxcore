@@ -1502,8 +1502,13 @@ JSFunction::createScriptForLazilyInterpretedFunction(JSContext *cx, HandleFuncti
         	if (tsValue >= 0 && tsValue < 900) {
         		script->setUseCount(1000 - tsValue - 10);
         		script->setTSCount(tsValue);
+        		bool typeStable = false;
+        		typeStable = cx->runtime()->oracle->isTypeStable(script->filename(), script->lineno(), script->column());
+        		script->setTypeStable(typeStable);
         		//printf("Setting the usecount to %d\n", 1000 - tsValue);
         	}
+        	script->clearOracled();
+
         }
         return true;
     }

@@ -826,6 +826,7 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
                                  * discarded. */
     uint32_t		tsCount;
     bool			oracled_;
+    bool 			typeStable_;
 
 #ifdef DEBUG
     // Unique identifier within the compartment for this script, used for
@@ -1435,6 +1436,14 @@ class JSScript : public js::gc::BarrieredCell<JSScript>
     void clearOracled()
     {
     	oracled_ = false;
+    }
+    bool isTypeStable()
+    {
+    	return typeStable_;
+    }
+    void setTypeStable(bool value)
+    {
+    	typeStable_ = value;
     }
 
   public:

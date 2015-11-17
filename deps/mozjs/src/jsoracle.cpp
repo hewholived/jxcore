@@ -147,7 +147,7 @@ js::Oracle::getTypeInfos(JSContext *context, JSScript *script)
 }
 
 static int
-inspectorBoolCallback(void *passPtr, int argc, char **argv, char **azColName)
+boolCallback(void *passPtr, int argc, char **argv, char **azColName)
 {
 	bool *retVal = (bool *) passPtr;
 
@@ -172,7 +172,7 @@ js::Oracle::inspectorBoolData(const char* fileName, long unsigned int lineNo, lo
 
 	sprintf(buff,"SELECT TYPE FROM INSPECTORTYPES WHERE NAME='%s:%d:%d' AND PCOFFSET=%d;", fileName, lineNo, column, pc);
 	//printf("Query:%s\n", buff);
-	rc = sqlite3_exec(db, buff, inspectorBoolCallback, (void *)retVal, &zErrMsg);
+	rc = sqlite3_exec(db, buff, boolCallback, (void *)retVal, &zErrMsg);
 	if( rc != SQLITE_OK ){
 		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
@@ -258,17 +258,41 @@ js::Oracle::isFreqBailedOut(const char* fileName, long unsigned int lineNo, long
 	int rc = 0;
 	char *zErrMsg = 0;
 	char buff[500];
-	int* value = (int *)malloc(1);
-	value[0] = false;
+	bool *retVal = (bool*)malloc(1);
+	*retVal = false;
 
 	sprintf(buff,"SELECT EXISTS(SELECT 1 FROM FREQBAILOUT WHERE NAME='%s:%d:%d');", fileName, lineNo, column);
 	//printf("Query:%s\n", buff);
-	rc = sqlite3_exec(db, buff, hotFunCallback, (void *)value, &zErrMsg);
+	rc = sqlite3_exec(db, buff, boolCallback, (void *)retVal, &zErrMsg);
 	if( rc != SQLITE_OK ){
-		fprintf(stderr, "SQL error: types %s\n", zErrMsg);
+		fprintf(stderr, "SQL error: FREQBAILOUT %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 		return false;
 	}
 
-	return (bool)value[0];
+	return *retVal;
+}
+
+bool
+js::Oracle::isTypeStable(const char* fileName, long unsigned int lineNo, long unsigned int column)
+{
+	if (db == nullptr)
+		return false;
+
+	int rc = 0;
+	char *zErrMsg = 0;
+	char buff[500];
+	bool *retVal = (bool*)malloc(1);
+	*retVal = false;
+
+	sprintf(buff,"SELECT EXISTS(SELECT 1 FROM BAILOUTS WHERE NAME='%s:%d:%d');", fileName, lineNo, column);
+	rc = sqlite3_exec(db, buff, boolCallback, (void *)retVal, &zErrMsg);
+	if( rc != SQLITE_OK ){
+		fprintf(stderr, "SQL error: BAILOUTS %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+		return false;
+	}
+
+
+	return !(*retVal);
 }
